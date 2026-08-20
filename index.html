@@ -1,0 +1,901 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Perceptra — Audience Engine</title>
+<meta name="description" id="meta-desc" content="Perceptra simula focus group con audience sintetiche calibrate su panel umani reali. Ogni insight è misurato con lo SHCS.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800&family=Instrument+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#0B1D2D;
+  --panel:#112B3F;
+  --panel-2:#0E2436;
+  --teal:#1FB5B6;
+  --cyan:#33D6E6;
+  --paper:#F2F5F7;
+  --muted:#8CA3B5;
+  --line:rgba(140,163,181,.16);
+  --maxw:1140px;
+  --radius:14px;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  background:var(--ink);
+  color:var(--paper);
+  font-family:'Instrument Sans',system-ui,sans-serif;
+  font-size:17px;
+  line-height:1.65;
+  -webkit-font-smoothing:antialiased;
+}
+::selection{background:var(--cyan);color:var(--ink)}
+a{color:inherit;text-decoration:none}
+img{max-width:100%;display:block}
+
+/* ---------- type ---------- */
+h1,h2,h3{font-family:'Archivo',sans-serif;line-height:1.08;letter-spacing:-.02em}
+h1{font-size:clamp(2.4rem,5.4vw,4.2rem);font-weight:800}
+h2{font-size:clamp(1.8rem,3.6vw,2.7rem);font-weight:700}
+h3{font-size:1.15rem;font-weight:700;letter-spacing:-.01em}
+.eyebrow{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:.72rem;font-weight:500;
+  letter-spacing:.22em;text-transform:uppercase;
+  color:var(--teal);
+  display:flex;align-items:center;gap:.8rem;
+}
+.eyebrow::before{content:"";width:26px;height:1px;background:var(--teal);flex:none}
+.lead{color:var(--muted);font-size:1.08rem;max-width:56ch}
+.mono{font-family:'IBM Plex Mono',monospace}
+
+/* ---------- layout primitives ---------- */
+.wrap{max-width:var(--maxw);margin:0 auto;padding:0 24px}
+section{padding:104px 0;border-top:1px solid var(--line)}
+.sec-head{display:grid;gap:1.1rem;margin-bottom:3.2rem;max-width:720px}
+
+/* ---------- reveal ---------- */
+.rv{opacity:0;transform:translateY(18px);transition:opacity .7s ease,transform .7s ease}
+.rv.in{opacity:1;transform:none}
+@media (prefers-reduced-motion:reduce){
+  .rv{opacity:1;transform:none;transition:none}
+  html{scroll-behavior:auto}
+  *{animation:none!important;transition:none!important}
+}
+
+/* ---------- nav ---------- */
+nav{
+  position:sticky;top:0;z-index:50;
+  background:rgba(11,29,45,.82);
+  backdrop-filter:blur(14px);
+  border-bottom:1px solid var(--line);
+}
+.nav-in{max-width:var(--maxw);margin:0 auto;padding:0 24px;height:68px;display:flex;align-items:center;justify-content:space-between;gap:1rem}
+.brand{display:flex;align-items:center;gap:.7rem}
+.brand svg{width:30px;height:30px}
+.brand-name{font-family:'Archivo',sans-serif;font-weight:700;font-size:1.12rem;letter-spacing:-.01em}
+.brand-tag{font-family:'IBM Plex Mono',monospace;font-size:.58rem;letter-spacing:.24em;color:var(--teal);text-transform:uppercase;display:block;margin-top:-2px}
+.nav-links{display:flex;gap:2rem;align-items:center}
+.nav-links a{font-size:.92rem;color:var(--muted);transition:color .2s}
+.nav-links a:hover,.nav-links a:focus-visible{color:var(--paper)}
+.btn{
+  display:inline-flex;align-items:center;gap:.55rem;
+  font-family:'Archivo',sans-serif;font-weight:600;font-size:.95rem;
+  padding:.78rem 1.5rem;border-radius:999px;cursor:pointer;border:0;
+  transition:transform .2s,box-shadow .2s,background .2s;
+}
+.btn:focus-visible,a:focus-visible,.lang button:focus-visible{outline:2px solid var(--cyan);outline-offset:3px}
+.btn-primary{background:linear-gradient(120deg,var(--cyan),var(--teal));color:var(--ink)}
+.btn-primary:hover{transform:translateY(-1px);box-shadow:0 8px 30px rgba(51,214,230,.25)}
+.btn-ghost{background:transparent;color:var(--paper);border:1px solid rgba(140,163,181,.35)}
+.btn-ghost:hover{border-color:var(--cyan);color:var(--cyan)}
+.nav-cta{padding:.6rem 1.2rem;font-size:.88rem}
+
+/* ---------- lang switcher ---------- */
+.lang{
+  display:flex;gap:2px;border:1px solid var(--line);border-radius:999px;
+  padding:3px;background:rgba(17,43,63,.6);
+}
+.lang button{
+  font-family:'IBM Plex Mono',monospace;font-size:.66rem;letter-spacing:.08em;
+  background:transparent;border:0;color:var(--muted);cursor:pointer;
+  padding:.32rem .62rem;border-radius:999px;transition:background .2s,color .2s;
+}
+.lang button:hover{color:var(--paper)}
+.lang button.active{background:linear-gradient(120deg,var(--cyan),var(--teal));color:var(--ink);font-weight:500}
+
+/* ---------- hero ---------- */
+.hero{border-top:0;padding:96px 0 110px;position:relative;overflow:hidden}
+.hero::after{
+  content:"";position:absolute;inset:auto -20% -55% -20%;height:70%;
+  background:radial-gradient(ellipse at center,rgba(31,181,182,.13),transparent 65%);
+  pointer-events:none;
+}
+.hero-grid{display:grid;grid-template-columns:1.05fr .95fr;gap:4.5rem;align-items:center;position:relative;z-index:1}
+.hero h1 .hl{background:linear-gradient(100deg,var(--cyan),var(--teal));-webkit-background-clip:text;background-clip:text;color:transparent}
+.hero .lead{margin:1.4rem 0 2.2rem}
+.hero-ctas{display:flex;gap:1rem;flex-wrap:wrap}
+.hero-note{margin-top:1.6rem;font-family:'IBM Plex Mono',monospace;font-size:.72rem;color:var(--muted);letter-spacing:.06em}
+.hero-note b{color:var(--teal);font-weight:500}
+
+/* console card (signature) */
+.console{
+  background:linear-gradient(160deg,var(--panel),var(--panel-2));
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  box-shadow:0 30px 80px rgba(0,0,0,.45);
+  overflow:hidden;
+}
+.console-bar{display:flex;align-items:center;justify-content:space-between;padding:.85rem 1.2rem;border-bottom:1px solid var(--line)}
+.console-bar .t{font-family:'IBM Plex Mono',monospace;font-size:.68rem;letter-spacing:.14em;color:var(--muted);text-transform:uppercase}
+.live{display:flex;align-items:center;gap:.45rem;font-family:'IBM Plex Mono',monospace;font-size:.65rem;color:var(--cyan);letter-spacing:.1em}
+.live i{width:7px;height:7px;border-radius:50%;background:var(--cyan);animation:pulse 1.6s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.25}}
+.console-q{padding:1.1rem 1.2rem .4rem;font-size:.92rem;color:var(--paper)}
+.console-q span{color:var(--muted)}
+.dots{display:grid;grid-template-columns:repeat(20,1fr);gap:7px;padding:1.1rem 1.2rem 1.3rem}
+.dot{aspect-ratio:1;border-radius:50%;background:rgba(140,163,181,.18);transition:background .45s,box-shadow .45s,transform .45s}
+.dot.on{background:var(--cyan);box-shadow:0 0 10px rgba(51,214,230,.55);transform:scale(1.12)}
+.dot.on.b{background:var(--teal);box-shadow:0 0 8px rgba(31,181,182,.45)}
+.console-stats{display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid var(--line)}
+.cstat{padding:1rem 1.2rem;border-right:1px solid var(--line)}
+.cstat:last-child{border-right:0}
+.cstat .v{font-family:'Archivo',sans-serif;font-weight:800;font-size:1.5rem;letter-spacing:-.02em}
+.cstat .v em{font-style:normal;color:var(--cyan)}
+.cstat .l{font-family:'IBM Plex Mono',monospace;font-size:.62rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-top:.15rem}
+
+/* ---------- progetto ---------- */
+.split{display:grid;grid-template-columns:1fr 1fr;gap:4rem;align-items:start}
+.prose p{color:var(--muted);margin-bottom:1.1rem}
+.prose p b,.prose p strong{color:var(--paper);font-weight:600}
+.claimbox{
+  background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);
+  padding:1.6rem 1.8rem;margin-top:.4rem;
+}
+.claimbox .mono{font-size:.68rem;letter-spacing:.18em;text-transform:uppercase;color:var(--teal)}
+.claimbox p{font-family:'Archivo',sans-serif;font-weight:600;font-size:1.25rem;line-height:1.35;margin-top:.6rem;color:var(--paper)}
+
+/* ---------- metodo ---------- */
+.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:1.1rem}
+.step{
+  background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);
+  padding:1.6rem 1.4rem;position:relative;
+}
+.step .n{font-family:'IBM Plex Mono',monospace;font-size:.7rem;color:var(--teal);letter-spacing:.16em}
+.step h3{margin:.8rem 0 .55rem}
+.step p{font-size:.92rem;color:var(--muted)}
+.step::after{
+  content:"→";position:absolute;right:-17px;top:50%;transform:translateY(-50%);
+  color:var(--teal);font-size:1.1rem;z-index:2;
+}
+.step:last-child::after{display:none}
+
+/* ---------- SHCS ---------- */
+.shcs-card{
+  background:linear-gradient(160deg,var(--panel),var(--panel-2));
+  border:1px solid var(--line);border-radius:var(--radius);
+  padding:2.2rem;display:grid;grid-template-columns:1.2fr .8fr;gap:2.5rem;align-items:center;
+}
+.shcs-chart svg{width:100%;height:auto;display:block}
+.legend{display:flex;gap:1.6rem;margin-top:1rem;font-family:'IBM Plex Mono',monospace;font-size:.68rem;letter-spacing:.1em;color:var(--muted)}
+.legend i{display:inline-block;width:18px;height:2px;vertical-align:middle;margin-right:.5rem}
+.score .v{font-family:'Archivo',sans-serif;font-weight:800;font-size:clamp(3.4rem,6vw,5rem);letter-spacing:-.03em;line-height:1;background:linear-gradient(100deg,var(--cyan),var(--teal));-webkit-background-clip:text;background-clip:text;color:transparent}
+.score .l{font-family:'IBM Plex Mono',monospace;font-size:.68rem;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);margin-top:.6rem}
+.score p{color:var(--muted);font-size:.95rem;margin-top:1.2rem;max-width:34ch}
+.threshold{
+  margin-top:1.4rem;padding:.8rem 1rem;border-left:2px solid var(--cyan);
+  background:rgba(51,214,230,.06);font-size:.78rem;color:var(--paper);border-radius:0 8px 8px 0;
+  font-family:'IBM Plex Mono',monospace;
+}
+
+/* ---------- vision/mission ---------- */
+.vm{display:grid;grid-template-columns:1fr 1fr;gap:1.1rem}
+.vm-card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:2.2rem}
+.vm-card .mono{font-size:.68rem;letter-spacing:.18em;text-transform:uppercase;color:var(--teal)}
+.vm-card h3{font-size:1.5rem;margin:.9rem 0 .7rem;line-height:1.25}
+.vm-card p{color:var(--muted);font-size:.98rem}
+
+.values{display:grid;grid-template-columns:repeat(2,1fr);gap:1.1rem;margin-top:1.1rem}
+.value{border:1px solid var(--line);border-radius:var(--radius);padding:1.7rem 1.6rem;background:var(--panel-2)}
+.value h3{display:flex;align-items:baseline;gap:.7rem}
+.value h3 .k{font-family:'IBM Plex Mono',monospace;font-size:.68rem;color:var(--teal);letter-spacing:.12em;font-weight:500}
+.value p{font-size:.92rem;color:var(--muted);margin-top:.5rem}
+
+/* ---------- team ---------- */
+.team{display:grid;grid-template-columns:repeat(4,1fr);gap:1.1rem}
+.member{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:1.7rem 1.5rem;transition:border-color .25s,transform .25s}
+.member:hover{border-color:rgba(51,214,230,.4);transform:translateY(-3px)}
+.avatar{
+  width:52px;height:52px;border-radius:12px;margin-bottom:1.1rem;
+  background:linear-gradient(135deg,var(--teal),var(--panel));
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Archivo',sans-serif;font-weight:800;color:var(--ink);font-size:1.05rem;letter-spacing:-.02em;
+}
+.member h3{font-size:1.02rem}
+.member .role{font-family:'IBM Plex Mono',monospace;font-size:.62rem;letter-spacing:.14em;text-transform:uppercase;color:var(--cyan);margin:.3rem 0 .7rem}
+.member p{font-size:.86rem;color:var(--muted)}
+
+/* ---------- positioning strip ---------- */
+.strip{
+  border:1px solid var(--line);border-radius:var(--radius);
+  background:linear-gradient(120deg,rgba(31,181,182,.1),rgba(17,43,63,.6));
+  padding:2.4rem 2.6rem;display:grid;grid-template-columns:1fr auto;gap:2rem;align-items:center;
+}
+.strip h3{font-size:1.45rem;max-width:30ch}
+.strip p{color:var(--muted);margin-top:.5rem;max-width:56ch;font-size:.96rem}
+
+/* ---------- footer ---------- */
+footer{border-top:1px solid var(--line);padding:64px 0 40px}
+.f-grid{display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:3rem;margin-bottom:3rem}
+.f-grid p{color:var(--muted);font-size:.9rem;max-width:38ch;margin-top:.9rem}
+.f-col h4{font-family:'IBM Plex Mono',monospace;font-size:.66rem;letter-spacing:.18em;text-transform:uppercase;color:var(--teal);margin-bottom:1rem;font-weight:500}
+.f-col a{display:block;color:var(--muted);font-size:.92rem;padding:.28rem 0;transition:color .2s}
+.f-col a:hover{color:var(--paper)}
+.f-bottom{border-top:1px solid var(--line);padding-top:1.6rem;display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap;font-family:'IBM Plex Mono',monospace;font-size:.68rem;color:var(--muted);letter-spacing:.08em}
+
+/* ---------- responsive ---------- */
+@media(max-width:960px){
+  .hero-grid,.split,.shcs-card{grid-template-columns:1fr;gap:2.6rem}
+  .steps{grid-template-columns:1fr 1fr}
+  .step::after{display:none}
+  .team{grid-template-columns:1fr 1fr}
+  .strip{grid-template-columns:1fr}
+  .f-grid{grid-template-columns:1fr}
+  .nav-links a:not(.btn){display:none}
+  section{padding:78px 0}
+}
+@media(max-width:560px){
+  .steps,.team,.vm,.values{grid-template-columns:1fr}
+  .dots{grid-template-columns:repeat(14,1fr)}
+  .console-stats{grid-template-columns:1fr 1fr 1fr}
+  .cstat{padding:.85rem .8rem}
+  .cstat .v{font-size:1.15rem}
+  .nav-cta{display:none}
+}
+</style>
+</head>
+<body>
+
+<!-- ============ NAV ============ -->
+<nav>
+  <div class="nav-in">
+    <a class="brand" href="#top" aria-label="Perceptra — home">
+      <svg viewBox="0 0 100 100" aria-hidden="true">
+        <defs>
+          <linearGradient id="lg1" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="#33D6E6"/><stop offset="1" stop-color="#1FB5B6"/>
+          </linearGradient>
+        </defs>
+        <path fill="url(#lg1)" fill-rule="evenodd"
+          d="M22 6 H80 V64 H50 V78 L22 98 Z M44 26 H64 V46 H44 Z"/>
+        <path fill="#112B3F" opacity=".55" d="M22 6 L44 26 V46 L22 64 Z"/>
+        <path fill="#0B1D2D" opacity=".35" d="M50 64 V78 L22 98 V64 Z"/>
+      </svg>
+      <span>
+        <span class="brand-name">Perceptra</span>
+        <span class="brand-tag">Audience Engine</span>
+      </span>
+    </a>
+    <div class="nav-links">
+      <a href="#progetto" data-i18n="n_progetto"></a>
+      <a href="#metodo" data-i18n="n_metodo"></a>
+      <a href="#shcs">SHCS</a>
+      <a href="#chi-siamo" data-i18n="n_chi"></a>
+      <div class="lang" role="group" aria-label="Language">
+        <button data-lang="it">IT</button>
+        <button data-lang="en">EN</button>
+        <button data-lang="fr">FR</button>
+      </div>
+      <a href="#contatti" class="btn btn-primary nav-cta" data-i18n="n_cta"></a>
+    </div>
+  </div>
+</nav>
+
+<!-- ============ HERO ============ -->
+<header class="hero" id="top">
+  <div class="wrap hero-grid">
+    <div>
+      <div class="eyebrow" data-i18n="h_eyebrow"></div>
+      <h1 style="margin-top:1.2rem" data-i18n="h_title"></h1>
+      <p class="lead" data-i18n="h_lead"></p>
+      <div class="hero-ctas">
+        <a href="#contatti" class="btn btn-primary" data-i18n="h_cta1"></a>
+        <a href="#shcs" class="btn btn-ghost" data-i18n="h_cta2"></a>
+      </div>
+      <p class="hero-note" data-i18n="h_note"></p>
+    </div>
+
+    <!-- signature: audience console -->
+    <div class="console">
+      <div class="console-bar">
+        <span class="t" data-i18n="c_title"></span>
+        <span class="live"><i></i><span data-i18n="c_live"></span></span>
+      </div>
+      <div class="console-q" data-i18n="c_q"></div>
+      <div class="dots" id="dots" aria-hidden="true"></div>
+      <div class="console-stats">
+        <div class="cstat"><div class="v" id="stat-resp">0</div><div class="l" data-i18n="c_resp"></div></div>
+        <div class="cstat"><div class="v"><em id="stat-pos">0</em>%</div><div class="l" data-i18n="c_pos"></div></div>
+        <div class="cstat"><div class="v"><span id="stat-time">0</span><span style="font-size:.9rem">s</span></div><div class="l" data-i18n="c_time"></div></div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- ============ IL PROGETTO ============ -->
+<section id="progetto">
+  <div class="wrap">
+    <div class="sec-head rv">
+      <div class="eyebrow" data-i18n="p_eyebrow"></div>
+      <h2 data-i18n="p_title"></h2>
+    </div>
+    <div class="split">
+      <div class="prose rv">
+        <p data-i18n="p_p1"></p>
+        <p data-i18n="p_p2"></p>
+        <p data-i18n="p_p3"></p>
+      </div>
+      <div class="rv">
+        <div class="claimbox">
+          <span class="mono" data-i18n="p_c1_k"></span>
+          <p data-i18n="p_c1_t"></p>
+        </div>
+        <div class="claimbox" style="margin-top:1.1rem">
+          <span class="mono" data-i18n="p_c2_k"></span>
+          <p data-i18n="p_c2_t"></p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ METODO ============ -->
+<section id="metodo">
+  <div class="wrap">
+    <div class="sec-head rv">
+      <div class="eyebrow" data-i18n="m_eyebrow"></div>
+      <h2 data-i18n="m_title"></h2>
+      <p class="lead" data-i18n="m_lead"></p>
+    </div>
+    <div class="steps rv">
+      <div class="step">
+        <span class="n" data-i18n="s1n"></span>
+        <h3 data-i18n="s1t"></h3>
+        <p data-i18n="s1p"></p>
+      </div>
+      <div class="step">
+        <span class="n" data-i18n="s2n"></span>
+        <h3 data-i18n="s2t"></h3>
+        <p data-i18n="s2p"></p>
+      </div>
+      <div class="step">
+        <span class="n" data-i18n="s3n"></span>
+        <h3 data-i18n="s3t"></h3>
+        <p data-i18n="s3p"></p>
+      </div>
+      <div class="step">
+        <span class="n" data-i18n="s4n"></span>
+        <h3 data-i18n="s4t"></h3>
+        <p data-i18n="s4p"></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SHCS ============ -->
+<section id="shcs">
+  <div class="wrap">
+    <div class="sec-head rv">
+      <div class="eyebrow">SHCS — Synthetic-Human Correlation Score</div>
+      <h2 data-i18n="sh_title"></h2>
+      <p class="lead" data-i18n="sh_lead"></p>
+    </div>
+    <div class="shcs-card rv">
+      <div class="shcs-chart">
+        <svg viewBox="0 0 520 260" role="img" aria-label="Synthetic vs human convergence chart">
+          <g stroke="rgba(140,163,181,.12)" stroke-width="1">
+            <line x1="40" y1="30" x2="40" y2="220"/><line x1="40" y1="220" x2="500" y2="220"/>
+            <line x1="40" y1="77.5" x2="500" y2="77.5"/><line x1="40" y1="125" x2="500" y2="125"/>
+            <line x1="40" y1="172.5" x2="500" y2="172.5"/>
+          </g>
+          <g font-family="IBM Plex Mono,monospace" font-size="9" fill="#8CA3B5">
+            <text x="12" y="34">1.0</text><text x="12" y="129">0.5</text><text x="12" y="224">0.0</text>
+            <text x="40" y="240">Q01</text><text x="255" y="240">Q08</text><text x="478" y="240">Q15</text>
+          </g>
+          <polyline id="line-h" points="40,150 80,132 120,140 160,118 200,124 240,102 280,108 320,90 360,96 400,82 440,86 500,74"
+            fill="none" stroke="#F2F5F7" stroke-width="2.5" stroke-linecap="round"/>
+          <polyline id="line-s" points="40,190 80,158 120,152 160,134 200,131 240,112 280,113 320,97 360,99 400,86 440,88 500,76"
+            fill="none" stroke="#33D6E6" stroke-width="2.5" stroke-linecap="round"/>
+        </svg>
+        <div class="legend">
+          <span><i style="background:#F2F5F7"></i><span data-i18n="sh_leg_h"></span></span>
+          <span><i style="background:#33D6E6"></i><span data-i18n="sh_leg_s"></span></span>
+        </div>
+      </div>
+      <div class="score">
+        <div class="v"><span id="shcs-val">0.00</span></div>
+        <div class="l" data-i18n="sh_label"></div>
+        <p data-i18n="sh_desc"></p>
+        <div class="threshold" data-i18n="sh_threshold"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ VISION / MISSION / VALUES ============ -->
+<section id="visione">
+  <div class="wrap">
+    <div class="sec-head rv">
+      <div class="eyebrow" data-i18n="v_eyebrow"></div>
+      <h2 data-i18n="v_title"></h2>
+    </div>
+    <div class="vm rv">
+      <div class="vm-card">
+        <span class="mono" data-i18n="vis_k"></span>
+        <h3 data-i18n="vis_t"></h3>
+        <p data-i18n="vis_p"></p>
+      </div>
+      <div class="vm-card">
+        <span class="mono" data-i18n="mis_k"></span>
+        <h3 data-i18n="mis_t"></h3>
+        <p data-i18n="mis_p"></p>
+      </div>
+    </div>
+    <div class="values rv">
+      <div class="value">
+        <h3><span class="k">V·01</span><span data-i18n="v1t"></span></h3>
+        <p data-i18n="v1p"></p>
+      </div>
+      <div class="value">
+        <h3><span class="k">V·02</span><span data-i18n="v2t"></span></h3>
+        <p data-i18n="v2p"></p>
+      </div>
+      <div class="value">
+        <h3><span class="k">V·03</span><span data-i18n="v3t"></span></h3>
+        <p data-i18n="v3p"></p>
+      </div>
+      <div class="value">
+        <h3><span class="k">V·04</span><span data-i18n="v4t"></span></h3>
+        <p data-i18n="v4p"></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ CHI SIAMO ============ -->
+<section id="chi-siamo">
+  <div class="wrap">
+    <div class="sec-head rv">
+      <div class="eyebrow" data-i18n="t_eyebrow"></div>
+      <h2 data-i18n="t_title"></h2>
+      <p class="lead" data-i18n="t_lead"></p>
+    </div>
+    <div class="team rv">
+      <div class="member">
+        <div class="avatar">OA</div>
+        <h3>Oleksandr Aleksandrenko</h3>
+        <div class="role">Chief Product &amp; Strategy Officer</div>
+        <p data-i18n="b1"></p>
+      </div>
+      <div class="member">
+        <div class="avatar">LP</div>
+        <h3>Leo Peinkhofer</h3>
+        <div class="role">Chief Technology Officer</div>
+        <p data-i18n="b2"></p>
+      </div>
+      <div class="member">
+        <div class="avatar">AM</div>
+        <h3>Alessandro Monachini</h3>
+        <div class="role">Chief Revenue Officer</div>
+        <p data-i18n="b3"></p>
+      </div>
+      <div class="member">
+        <div class="avatar">MF</div>
+        <h3>Manuel Fusco</h3>
+        <div class="role">Chief Marketing Officer</div>
+        <p data-i18n="b4"></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ POSITIONING ============ -->
+<section id="posizionamento">
+  <div class="wrap">
+    <div class="strip rv">
+      <div>
+        <div class="eyebrow" style="margin-bottom:.9rem" data-i18n="pos_eyebrow"></div>
+        <h3 data-i18n="pos_title"></h3>
+        <p data-i18n="pos_p"></p>
+      </div>
+      <a href="#contatti" class="btn btn-primary" data-i18n="pos_cta"></a>
+    </div>
+  </div>
+</section>
+
+<!-- ============ CTA / CONTATTI ============ -->
+<section id="contatti" style="text-align:center">
+  <div class="wrap rv">
+    <div class="eyebrow" style="justify-content:center" data-i18n="ct_eyebrow"></div>
+    <h2 style="margin:1.2rem auto 1rem;max-width:20ch" data-i18n="ct_title"></h2>
+    <p class="lead" style="margin:0 auto 2.2rem" data-i18n="ct_lead"></p>
+    <div style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap">
+      <a href="mailto:hello@perceptra.eu" class="btn btn-primary" data-i18n="ct_b1"></a>
+      <a href="mailto:hello@perceptra.eu?subject=Pilot" class="btn btn-ghost" data-i18n="ct_b2"></a>
+    </div>
+  </div>
+</section>
+
+<!-- ============ FOOTER ============ -->
+<footer>
+  <div class="wrap">
+    <div class="f-grid">
+      <div>
+        <a class="brand" href="#top">
+          <svg viewBox="0 0 100 100" aria-hidden="true" style="width:26px;height:26px">
+            <path fill="url(#lg1)" fill-rule="evenodd" d="M22 6 H80 V64 H50 V78 L22 98 Z M44 26 H64 V46 H44 Z"/>
+            <path fill="#112B3F" opacity=".55" d="M22 6 L44 26 V46 L22 64 Z"/>
+          </svg>
+          <span>
+            <span class="brand-name">Perceptra</span>
+            <span class="brand-tag">Audience Engine</span>
+          </span>
+        </a>
+        <p data-i18n="f_desc"></p>
+      </div>
+      <div class="f-col">
+        <h4 data-i18n="f_nav_h"></h4>
+        <a href="#progetto" data-i18n="n_progetto"></a>
+        <a href="#metodo" data-i18n="n_metodo"></a>
+        <a href="#shcs">SHCS</a>
+        <a href="#chi-siamo" data-i18n="n_chi"></a>
+      </div>
+      <div class="f-col">
+        <h4 data-i18n="f_contact_h"></h4>
+        <a href="mailto:hello@perceptra.eu">hello@perceptra.eu</a>
+        <a href="#contatti" data-i18n="n_cta"></a>
+      </div>
+    </div>
+    <div class="f-bottom">
+      <span data-i18n="f_copy"></span>
+      <span>SHCS™ — Synthetic-Human Correlation Score</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+/* ================= I18N ================= */
+const I18N = {
+it:{
+  _title:"Perceptra — Audience Engine",
+  _desc:"Perceptra simula focus group con audience sintetiche calibrate su panel umani reali. Ogni insight è misurato con lo SHCS.",
+  n_progetto:"Il progetto", n_metodo:"Metodo", n_chi:"Chi siamo", n_cta:"Richiedi una demo",
+  h_eyebrow:"Ricerca qualitativa, ricostruita",
+  h_title:'Le reazioni del tuo mercato, <span class="hl">prima del mercato.</span>',
+  h_lead:"Perceptra simula focus group con audience sintetiche calibrate su panel umani reali. In ore, non in mesi. E ogni insight arriva con un numero che ti dice quanto puoi fidarti.",
+  h_cta1:"Richiedi una demo", h_cta2:"Come misuriamo l'affidabilità",
+  h_note:'Servizio gestito end-to-end · Studi consegnati solo sopra <b>soglia SHCS</b>',
+  c_title:"Studio 24-B · Concept test", c_live:"Simulazione attiva",
+  c_q:'<span class="mono">D07&nbsp;·&nbsp;</span>"Compreresti questo prodotto al prezzo indicato?"',
+  c_resp:"Rispondenti", c_pos:"Intenzione positiva", c_time:"Tempo di risposta",
+  p_eyebrow:"Il progetto",
+  p_title:"La ricerca qualitativa è rotta.<br>Non l'abbiamo aggiustata: l'abbiamo ricostruita.",
+  p_p1:"Un focus group tradizionale costa decine di migliaia di euro, richiede settimane di recruiting e ti restituisce le opinioni di otto persone in una stanza. Nel frattempo, la finestra di decisione si è chiusa.",
+  p_p2:"I tool self-serve hanno promesso di risolvere il problema e ne hanno creato un altro: survey compilate di fretta, panel professionisti del questionario, dati che nessuno sa se rispecchiano il mercato vero.",
+  p_p3:"<b>Perceptra prende una terza strada.</b> Generiamo audience sintetiche — profili demografici, psicografici e comportamentali costruiti sul tuo segmento reale — e le sottoponiamo allo stesso protocollo di un focus group professionale. Poi facciamo la cosa che nessun altro fa: <b>verifichiamo il sintetico contro l'umano</b>, studio per studio.",
+  p_c1_k:"La differenza",
+  p_c1_t:"Non ti chiediamo di fidarti dell'AI. Ti mostriamo quanto è affidabile — con un punteggio di correlazione misurato su persone vere.",
+  p_c2_k:"Il formato",
+  p_c2_t:"Servizio gestito, non un altro tool. Il tuo team fa le domande giuste; al resto pensiamo noi: design dello studio, simulazione, validazione, insight azionabili.",
+  m_eyebrow:"Il metodo",
+  m_title:"Quattro fasi. Una soglia di qualità non negoziabile.",
+  m_lead:"Il processo è una sequenza reale: ogni fase produce l'input della successiva, e l'ultima decide se lo studio esce o torna in calibrazione.",
+  s1n:"FASE 01", s1t:"Design dello studio",
+  s1p:"Definiamo insieme obiettivi, segmenti target e discussion guide — con lo stesso rigore di un istituto di ricerca.",
+  s2n:"FASE 02", s2t:"Simulazione",
+  s2p:"Generiamo l'audience sintetica sul tuo segmento e la sottoponiamo al protocollo. Centinaia di rispondenti, ore invece di settimane.",
+  s3n:"FASE 03", s3t:"Calibrazione umana",
+  s3p:"Un mini-panel di persone reali affronta lo stesso identico protocollo. È il termine di paragone, non un optional.",
+  s4n:"FASE 04", s4t:"SHCS & insight",
+  s4p:"Misuriamo la correlazione tra sintetico e umano. Sopra soglia, consegniamo gli insight. Sotto soglia, ricalibriamo. Punto.",
+  sh_title:"Il numero che rende l'AI accountable.",
+  sh_lead:"Ogni studio Perceptra è accompagnato dallo SHCS: quanto le risposte dell'audience sintetica correlano con quelle del panel umano di controllo, sullo stesso protocollo. È la nostra metrica proprietaria — e il motivo per cui puoi portare i nostri insight in un board meeting.",
+  sh_leg_h:"Panel umano", sh_leg_s:"Audience sintetica",
+  sh_label:"SHCS · Studio 24-B",
+  sh_desc:"Correlazione tra le distribuzioni di risposta sintetiche e umane, domanda per domanda.",
+  sh_threshold:"SOGLIA DI CONSEGNA ≥ 0.80 — sotto, lo studio non esce.",
+  v_eyebrow:"Perché esistiamo",
+  v_title:"Visione, missione e i principi da cui non deroghiamo.",
+  vis_k:"Visione",
+  vis_t:"Un mondo in cui nessuna decisione di prodotto viene presa alla cieca.",
+  vis_p:"La distanza tra chi costruisce e chi compra è la causa nascosta della maggior parte dei fallimenti di mercato. Vogliamo azzerarla: rendere la voce del pubblico disponibile a ogni decisione, non solo a quelle che possono permettersi mesi di ricerca.",
+  mis_k:"Missione",
+  mis_t:"Ricerca qualitativa veloce, misurabile e accessibile al mid-market.",
+  mis_p:"Portiamo alle aziende di media dimensione un rigore che finora era riservato ai budget enterprise — con tempi compatibili con il ritmo reale delle decisioni e una metrica di affidabilità esplicita su ogni consegna.",
+  v1t:"Calibrazione prima della scala",
+  v1p:"Non consegniamo mai uno studio sotto soglia SHCS. Preferiamo ricalibrare e ritardare piuttosto che spedire un insight in cui non crediamo.",
+  v2t:"Trasparenza metodologica",
+  v2p:"Il cliente vede come è costruita l'audience, su chi è calibrata e con quale punteggio. Nessuna scatola nera presentata come magia.",
+  v3t:"Human-in-the-loop",
+  v3p:"Il sintetico accelera, l'umano valida. Ogni studio include persone vere: è un vincolo di progetto, non una feature premium.",
+  v4t:"Rigore accessibile",
+  v4p:"La qualità della ricerca non deve dipendere dalla dimensione del budget. Costruiamo per chi finora doveva scegliere tra fare male o non fare affatto.",
+  t_eyebrow:"Chi siamo",
+  t_title:"Quattro fondatori, un'ossessione: insight di cui fidarsi.",
+  t_lead:"Prodotto, tecnologia, revenue e marketing sotto lo stesso tetto fin dal primo giorno. Nessun reparto in outsourcing, nessuna competenza di facciata.",
+  b1:"Disegna il prodotto e la strategia. Background in finanza istituzionale e system design: la disciplina della misurazione applicata alla ricerca di mercato.",
+  b2:"Guida l'architettura dell'Audience Engine: pipeline di simulazione, calibrazione dei modelli e infrastruttura dati orientata alla privacy.",
+  b3:"Porta Perceptra sul mercato. Esperienza commerciale sul campo nel B2B: conosce le domande che i clienti fanno davvero, non quelle dei pitch deck.",
+  b4:"Costruisce il brand e la domanda. Marketing come trasferimento di fiducia: la stessa trasparenza che chiediamo ai nostri dati, applicata alla comunicazione.",
+  pos_eyebrow:"Posizionamento",
+  pos_title:"Più rigoroso di un tool self-serve. Più veloce e accessibile di un istituto enterprise.",
+  pos_p:"Perceptra occupa lo spazio che il mercato ha lasciato scoperto: il mid-market che merita ricerca di qualità enterprise, in tempi e a costi compatibili con la realtà. Come servizio gestito — perché un insight sbagliato costa più di uno studio fatto bene.",
+  pos_cta:"Parliamone",
+  ct_eyebrow:"Inizia da qui",
+  ct_title:"Metti alla prova il tuo prossimo concept.",
+  ct_lead:"Uno studio pilota sul tuo caso reale: stesso protocollo, stessa soglia SHCS, stessa trasparenza. Vedi il metodo funzionare sui tuoi dati prima di decidere.",
+  ct_b1:"Richiedi una demo", ct_b2:"Proponi uno studio pilota",
+  f_desc:"Focus group sintetici, calibrati su persone reali. Ogni insight con il suo punteggio di affidabilità.",
+  f_nav_h:"Naviga", f_contact_h:"Contatti",
+  f_copy:"© 2026 Perceptra. Tutti i diritti riservati."
+},
+en:{
+  _title:"Perceptra — Audience Engine",
+  _desc:"Perceptra runs synthetic focus groups calibrated against real human panels. Every insight comes with an SHCS reliability score.",
+  n_progetto:"The project", n_metodo:"Method", n_chi:"About us", n_cta:"Request a demo",
+  h_eyebrow:"Qualitative research, rebuilt",
+  h_title:'Your market\'s reactions, <span class="hl">before the market.</span>',
+  h_lead:"Perceptra runs synthetic focus groups calibrated against real human panels. In hours, not months. And every insight ships with a number that tells you how much to trust it.",
+  h_cta1:"Request a demo", h_cta2:"How we measure reliability",
+  h_note:'End-to-end managed service · Studies delivered only above the <b>SHCS threshold</b>',
+  c_title:"Study 24-B · Concept test", c_live:"Simulation running",
+  c_q:'<span class="mono">Q07&nbsp;·&nbsp;</span>"Would you buy this product at the listed price?"',
+  c_resp:"Respondents", c_pos:"Positive intent", c_time:"Response time",
+  p_eyebrow:"The project",
+  p_title:"Qualitative research is broken.<br>We didn't patch it — we rebuilt it.",
+  p_p1:"A traditional focus group costs tens of thousands of euros, takes weeks of recruiting, and hands you the opinions of eight people in a room. By then, the decision window has closed.",
+  p_p2:"Self-serve tools promised to fix the problem and created another one: rushed surveys, professional questionnaire-takers, and data nobody can tie back to the real market.",
+  p_p3:"<b>Perceptra takes a third path.</b> We generate synthetic audiences — demographic, psychographic and behavioural profiles built on your actual segment — and run them through the same protocol as a professional focus group. Then we do the one thing nobody else does: <b>we verify synthetic against human</b>, study by study.",
+  p_c1_k:"The difference",
+  p_c1_t:"We don't ask you to trust the AI. We show you how reliable it is — with a correlation score measured on real people.",
+  p_c2_k:"The format",
+  p_c2_t:"A managed service, not another tool. Your team asks the right questions; we handle the rest: study design, simulation, validation, actionable insights.",
+  m_eyebrow:"The method",
+  m_title:"Four phases. One non-negotiable quality threshold.",
+  m_lead:"The process is a real sequence: each phase produces the input for the next, and the last one decides whether the study ships or goes back into calibration.",
+  s1n:"PHASE 01", s1t:"Study design",
+  s1p:"Together we define objectives, target segments and the discussion guide — with the same rigour as a research institute.",
+  s2n:"PHASE 02", s2t:"Simulation",
+  s2p:"We generate the synthetic audience on your segment and run it through the protocol. Hundreds of respondents, hours instead of weeks.",
+  s3n:"PHASE 03", s3t:"Human calibration",
+  s3p:"A mini-panel of real people goes through the exact same protocol. It's the benchmark, not an optional extra.",
+  s4n:"PHASE 04", s4t:"SHCS & insights",
+  s4p:"We measure the correlation between synthetic and human. Above threshold, we deliver the insights. Below threshold, we recalibrate. Period.",
+  sh_title:"The number that holds AI accountable.",
+  sh_lead:"Every Perceptra study ships with its SHCS: how strongly the synthetic audience's answers correlate with the human control panel's, on the same protocol. It's our proprietary metric — and the reason you can bring our insights into a board meeting.",
+  sh_leg_h:"Human panel", sh_leg_s:"Synthetic audience",
+  sh_label:"SHCS · Study 24-B",
+  sh_desc:"Correlation between synthetic and human response distributions, question by question.",
+  sh_threshold:"DELIVERY THRESHOLD ≥ 0.80 — below it, the study doesn't ship.",
+  v_eyebrow:"Why we exist",
+  v_title:"Vision, mission and the principles we don't bend.",
+  vis_k:"Vision",
+  vis_t:"A world where no product decision is made blind.",
+  vis_p:"The distance between the people who build and the people who buy is the hidden cause of most market failures. We want to close it: make the audience's voice available to every decision, not just the ones that can afford months of research.",
+  mis_k:"Mission",
+  mis_t:"Qualitative research that's fast, measurable and accessible to the mid-market.",
+  mis_p:"We bring mid-sized companies a level of rigour that used to be reserved for enterprise budgets — on timelines that match how decisions actually get made, with an explicit reliability metric on every delivery.",
+  v1t:"Calibration before scale",
+  v1p:"We never deliver a study below the SHCS threshold. We'd rather recalibrate and delay than ship an insight we don't believe in.",
+  v2t:"Methodological transparency",
+  v2p:"Clients see how the audience is built, who it's calibrated against, and with what score. No black box dressed up as magic.",
+  v3t:"Human-in-the-loop",
+  v3p:"Synthetic accelerates, human validates. Every study includes real people: it's a design constraint, not a premium feature.",
+  v4t:"Accessible rigour",
+  v4p:"Research quality shouldn't depend on budget size. We build for the companies that until now had to choose between doing it badly or not doing it at all.",
+  t_eyebrow:"About us",
+  t_title:"Four founders, one obsession: insights you can trust.",
+  t_lead:"Product, technology, revenue and marketing under one roof from day one. No outsourced departments, no borrowed expertise.",
+  b1:"Designs the product and the strategy. Background in institutional finance and system design: the discipline of measurement applied to market research.",
+  b2:"Leads the Audience Engine architecture: simulation pipelines, model calibration and privacy-first data infrastructure.",
+  b3:"Takes Perceptra to market. Hands-on B2B commercial experience: he knows the questions clients actually ask, not the ones in pitch decks.",
+  b4:"Builds the brand and the demand. Marketing as a transfer of trust: the same transparency we demand of our data, applied to how we communicate.",
+  pos_eyebrow:"Positioning",
+  pos_title:"More rigorous than a self-serve tool. Faster and more accessible than an enterprise institute.",
+  pos_p:"Perceptra occupies the space the market left uncovered: the mid-market that deserves enterprise-grade research, on timelines and budgets that match reality. Delivered as a managed service — because a wrong insight costs more than a well-run study.",
+  pos_cta:"Let's talk",
+  ct_eyebrow:"Start here",
+  ct_title:"Put your next concept to the test.",
+  ct_lead:"A pilot study on your real case: same protocol, same SHCS threshold, same transparency. See the method work on your data before you decide.",
+  ct_b1:"Request a demo", ct_b2:"Propose a pilot study",
+  f_desc:"Synthetic focus groups, calibrated on real people. Every insight with its reliability score.",
+  f_nav_h:"Navigate", f_contact_h:"Contact",
+  f_copy:"© 2026 Perceptra. All rights reserved."
+},
+fr:{
+  _title:"Perceptra — Audience Engine",
+  _desc:"Perceptra simule des focus groups avec des audiences synthétiques calibrées sur des panels humains réels. Chaque insight est mesuré par le SHCS.",
+  n_progetto:"Le projet", n_metodo:"Méthode", n_chi:"Qui sommes-nous", n_cta:"Demander une démo",
+  h_eyebrow:"La recherche qualitative, reconstruite",
+  h_title:'Les réactions de votre marché, <span class="hl">avant le marché.</span>',
+  h_lead:"Perceptra simule des focus groups avec des audiences synthétiques calibrées sur des panels humains réels. En quelques heures, pas en plusieurs mois. Et chaque insight est livré avec un chiffre qui vous dit à quel point vous pouvez vous y fier.",
+  h_cta1:"Demander une démo", h_cta2:"Comment nous mesurons la fiabilité",
+  h_note:'Service géré de bout en bout · Études livrées uniquement au-dessus du <b>seuil SHCS</b>',
+  c_title:"Étude 24-B · Test de concept", c_live:"Simulation en cours",
+  c_q:'<span class="mono">Q07&nbsp;·&nbsp;</span>« Achèteriez-vous ce produit au prix indiqué ? »',
+  c_resp:"Répondants", c_pos:"Intention positive", c_time:"Temps de réponse",
+  p_eyebrow:"Le projet",
+  p_title:"La recherche qualitative est cassée.<br>Nous ne l'avons pas réparée : nous l'avons reconstruite.",
+  p_p1:"Un focus group traditionnel coûte des dizaines de milliers d'euros, exige des semaines de recrutement et vous livre les opinions de huit personnes dans une salle. Entre-temps, la fenêtre de décision s'est refermée.",
+  p_p2:"Les outils en self-service ont promis de résoudre le problème et en ont créé un autre : des questionnaires bâclés, des panélistes professionnels du sondage, des données que personne ne sait rattacher au marché réel.",
+  p_p3:"<b>Perceptra choisit une troisième voie.</b> Nous générons des audiences synthétiques — profils démographiques, psychographiques et comportementaux construits sur votre segment réel — et les soumettons au même protocole qu'un focus group professionnel. Puis nous faisons ce que personne d'autre ne fait : <b>nous vérifions le synthétique face à l'humain</b>, étude par étude.",
+  p_c1_k:"La différence",
+  p_c1_t:"Nous ne vous demandons pas de faire confiance à l'IA. Nous vous montrons sa fiabilité — avec un score de corrélation mesuré sur des personnes réelles.",
+  p_c2_k:"Le format",
+  p_c2_t:"Un service géré, pas un énième outil. Votre équipe pose les bonnes questions ; nous nous chargeons du reste : conception de l'étude, simulation, validation, insights actionnables.",
+  m_eyebrow:"La méthode",
+  m_title:"Quatre phases. Un seuil de qualité non négociable.",
+  m_lead:"Le processus est une véritable séquence : chaque phase produit l'entrée de la suivante, et la dernière décide si l'étude est livrée ou repart en calibration.",
+  s1n:"PHASE 01", s1t:"Conception de l'étude",
+  s1p:"Nous définissons ensemble les objectifs, les segments cibles et le guide de discussion — avec la même rigueur qu'un institut d'études.",
+  s2n:"PHASE 02", s2t:"Simulation",
+  s2p:"Nous générons l'audience synthétique sur votre segment et la soumettons au protocole. Des centaines de répondants, en heures plutôt qu'en semaines.",
+  s3n:"PHASE 03", s3t:"Calibration humaine",
+  s3p:"Un mini-panel de personnes réelles passe exactement le même protocole. C'est le point de référence, pas une option.",
+  s4n:"PHASE 04", s4t:"SHCS & insights",
+  s4p:"Nous mesurons la corrélation entre synthétique et humain. Au-dessus du seuil, nous livrons les insights. En dessous, nous recalibrons. Point final.",
+  sh_title:"Le chiffre qui rend l'IA responsable.",
+  sh_lead:"Chaque étude Perceptra est livrée avec son SHCS : le degré de corrélation entre les réponses de l'audience synthétique et celles du panel humain de contrôle, sur le même protocole. C'est notre métrique propriétaire — et la raison pour laquelle vous pouvez présenter nos insights en conseil d'administration.",
+  sh_leg_h:"Panel humain", sh_leg_s:"Audience synthétique",
+  sh_label:"SHCS · Étude 24-B",
+  sh_desc:"Corrélation entre les distributions de réponses synthétiques et humaines, question par question.",
+  sh_threshold:"SEUIL DE LIVRAISON ≥ 0.80 — en dessous, l'étude n'est pas livrée.",
+  v_eyebrow:"Notre raison d'être",
+  v_title:"Vision, mission et les principes auxquels nous ne dérogeons pas.",
+  vis_k:"Vision",
+  vis_t:"Un monde où aucune décision produit n'est prise à l'aveugle.",
+  vis_p:"La distance entre ceux qui construisent et ceux qui achètent est la cause cachée de la plupart des échecs de marché. Nous voulons la réduire à zéro : rendre la voix du public disponible pour chaque décision, pas seulement celles qui peuvent s'offrir des mois de recherche.",
+  mis_k:"Mission",
+  mis_t:"Une recherche qualitative rapide, mesurable et accessible au mid-market.",
+  mis_p:"Nous apportons aux entreprises de taille intermédiaire une rigueur jusqu'ici réservée aux budgets enterprise — dans des délais compatibles avec le rythme réel des décisions, avec une métrique de fiabilité explicite sur chaque livraison.",
+  v1t:"La calibration avant l'échelle",
+  v1p:"Nous ne livrons jamais une étude sous le seuil SHCS. Nous préférons recalibrer et retarder plutôt que livrer un insight auquel nous ne croyons pas.",
+  v2t:"Transparence méthodologique",
+  v2p:"Le client voit comment l'audience est construite, sur qui elle est calibrée et avec quel score. Pas de boîte noire déguisée en magie.",
+  v3t:"Human-in-the-loop",
+  v3p:"Le synthétique accélère, l'humain valide. Chaque étude inclut des personnes réelles : c'est une contrainte de conception, pas une option premium.",
+  v4t:"Une rigueur accessible",
+  v4p:"La qualité de la recherche ne doit pas dépendre de la taille du budget. Nous construisons pour ceux qui, jusqu'ici, devaient choisir entre mal faire ou ne pas faire du tout.",
+  t_eyebrow:"Qui sommes-nous",
+  t_title:"Quatre fondateurs, une obsession : des insights fiables.",
+  t_lead:"Produit, technologie, revenue et marketing sous le même toit dès le premier jour. Aucun département externalisé, aucune expertise de façade.",
+  b1:"Conçoit le produit et la stratégie. Parcours en finance institutionnelle et en system design : la discipline de la mesure appliquée aux études de marché.",
+  b2:"Dirige l'architecture de l'Audience Engine : pipelines de simulation, calibration des modèles et infrastructure de données orientée privacy.",
+  b3:"Porte Perceptra sur le marché. Expérience commerciale de terrain en B2B : il connaît les questions que les clients posent vraiment, pas celles des pitch decks.",
+  b4:"Construit la marque et la demande. Le marketing comme transfert de confiance : la transparence que nous exigeons de nos données, appliquée à notre communication.",
+  pos_eyebrow:"Positionnement",
+  pos_title:"Plus rigoureux qu'un outil self-service. Plus rapide et plus accessible qu'un institut enterprise.",
+  pos_p:"Perceptra occupe l'espace laissé vacant par le marché : le mid-market qui mérite une recherche de qualité enterprise, dans des délais et à des coûts compatibles avec la réalité. En service géré — parce qu'un insight erroné coûte plus cher qu'une étude bien menée.",
+  pos_cta:"Parlons-en",
+  ct_eyebrow:"Commencez ici",
+  ct_title:"Mettez votre prochain concept à l'épreuve.",
+  ct_lead:"Une étude pilote sur votre cas réel : même protocole, même seuil SHCS, même transparence. Voyez la méthode fonctionner sur vos données avant de décider.",
+  ct_b1:"Demander une démo", ct_b2:"Proposer une étude pilote",
+  f_desc:"Des focus groups synthétiques, calibrés sur des personnes réelles. Chaque insight avec son score de fiabilité.",
+  f_nav_h:"Navigation", f_contact_h:"Contact",
+  f_copy:"© 2026 Perceptra. Tous droits réservés."
+}
+};
+
+function setLang(l){
+  const d = I18N[l] || I18N.en;
+  document.documentElement.lang = l;
+  document.title = d._title;
+  const md=document.getElementById('meta-desc'); if(md) md.setAttribute('content', d._desc);
+  document.querySelectorAll('[data-i18n]').forEach(el=>{
+    const k=el.getAttribute('data-i18n');
+    if(d[k]!==undefined) el.innerHTML=d[k];
+  });
+  document.querySelectorAll('.lang button').forEach(b=>{
+    b.classList.toggle('active', b.dataset.lang===l);
+    b.setAttribute('aria-pressed', b.dataset.lang===l ? 'true':'false');
+  });
+}
+
+/* Auto-detect from device/browser language: it→IT, fr→FR, else EN */
+(function(){
+  const pref=(navigator.languages && navigator.languages[0]) || navigator.language || 'en';
+  const p=pref.toLowerCase();
+  const l = p.startsWith('it') ? 'it' : p.startsWith('fr') ? 'fr' : 'en';
+  setLang(l);
+  document.querySelectorAll('.lang button').forEach(b=>{
+    b.addEventListener('click',()=>setLang(b.dataset.lang));
+  });
+})();
+
+/* ================= INTERACTIONS ================= */
+(function(){
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* scroll reveal */
+  const io = new IntersectionObserver(es=>{
+    es.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target);} });
+  },{threshold:.15});
+  document.querySelectorAll('.rv').forEach(el=>io.observe(el));
+
+  /* hero: audience panel */
+  const grid = document.getElementById('dots');
+  const N = 120;
+  const dots = [];
+  for(let i=0;i<N;i++){
+    const d=document.createElement('div');
+    d.className='dot';
+    grid.appendChild(d); dots.push(d);
+  }
+  const sResp=document.getElementById('stat-resp');
+  const sPos=document.getElementById('stat-pos');
+  const sTime=document.getElementById('stat-time');
+
+  function count(el, target, dur, dec){
+    if(reduce){ el.textContent = dec? target.toFixed(dec) : target; return; }
+    const t0=performance.now();
+    function tick(t){
+      const p=Math.min((t-t0)/dur,1);
+      const eased=1-Math.pow(1-p,3);
+      const v=target*eased;
+      el.textContent = dec? v.toFixed(dec) : Math.round(v);
+      if(p<1) requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+  }
+
+  function runPanel(){
+    dots.forEach(d=>d.classList.remove('on','b'));
+    if(reduce){
+      dots.forEach((d,i)=>{ d.classList.add('on'); if(i%3===0)d.classList.add('b'); });
+      sResp.textContent=N; sPos.textContent=68; sTime.textContent='42';
+      return;
+    }
+    const order=[...dots.keys()].sort(()=>Math.random()-.5);
+    order.forEach((idx,i)=>{
+      setTimeout(()=>{
+        dots[idx].classList.add('on');
+        if(Math.random()<.32) dots[idx].classList.add('b');
+      }, 250 + i*22);
+    });
+    count(sResp, N, 3000);
+    count(sPos, 68, 3200);
+    count(sTime, 42, 2800);
+    setTimeout(runPanel, 9500);
+  }
+  runPanel();
+
+  /* SHCS: draw lines + count score */
+  function prepLine(id){
+    const l=document.getElementById(id);
+    const len=l.getTotalLength();
+    l.style.strokeDasharray=len;
+    l.style.strokeDashoffset=reduce?0:len;
+    return l;
+  }
+  const lh=prepLine('line-h'), ls=prepLine('line-s');
+  const shcsVal=document.getElementById('shcs-val');
+  const shcsIO=new IntersectionObserver(es=>{
+    es.forEach(e=>{
+      if(!e.isIntersecting) return;
+      shcsIO.disconnect();
+      if(reduce){ shcsVal.textContent='0.87'; return; }
+      [lh,ls].forEach((l,i)=>{
+        l.style.transition='stroke-dashoffset 1.8s ease '+(i*0.35)+'s';
+        l.style.strokeDashoffset=0;
+      });
+      setTimeout(()=>count(shcsVal, 0.87, 1800, 2), 500);
+    });
+  },{threshold:.4});
+  shcsIO.observe(document.querySelector('.shcs-card'));
+})();
+</script>
+</body>
+</html>
