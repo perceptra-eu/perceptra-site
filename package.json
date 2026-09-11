@@ -1,0 +1,7 @@
+{
+  "name": "perceptra-site",
+  "private": true,
+  "scripts": {
+    "build": "rm -rf public && mkdir public && node seo.mjs"
+  }
+}
