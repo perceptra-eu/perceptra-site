@@ -74,9 +74,8 @@ nav{
 }
 .nav-in{max-width:var(--maxw);margin:0 auto;padding:0 24px;height:68px;display:flex;align-items:center;justify-content:space-between;gap:1rem}
 .brand{display:flex;align-items:center;gap:.7rem}
-.brand svg{width:30px;height:30px}
-.brand-name{font-family:'Archivo',sans-serif;font-weight:700;font-size:1.12rem;letter-spacing:-.01em}
-.brand-tag{font-family:'IBM Plex Mono',monospace;font-size:.58rem;letter-spacing:.24em;color:var(--teal);text-transform:uppercase;display:block;margin-top:-2px}
+.brand-logo{height:38px;width:auto}
+.brand-logo--full{height:62px}
 .nav-links{display:flex;gap:2rem;align-items:center}
 .nav-links a{font-size:.92rem;color:var(--muted);transition:color .2s}
 .nav-links a:hover,.nav-links a:focus-visible{color:var(--paper)}
@@ -262,21 +261,7 @@ footer{border-top:1px solid var(--line);padding:64px 0 40px}
 <nav>
   <div class="nav-in">
     <a class="brand" href="#top" aria-label="Perceptra — home">
-      <svg viewBox="0 0 100 100" aria-hidden="true">
-        <defs>
-          <linearGradient id="lg1" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0" stop-color="#33D6E6"/><stop offset="1" stop-color="#1FB5B6"/>
-          </linearGradient>
-        </defs>
-        <path fill="url(#lg1)" fill-rule="evenodd"
-          d="M22 6 H80 V64 H50 V78 L22 98 Z M44 26 H64 V46 H44 Z"/>
-        <path fill="#112B3F" opacity=".55" d="M22 6 L44 26 V46 L22 64 Z"/>
-        <path fill="#0B1D2D" opacity=".35" d="M50 64 V78 L22 98 V64 Z"/>
-      </svg>
-      <span>
-        <span class="brand-name">Perceptra</span>
-        <span class="brand-tag">Audience Engine</span>
-      </span>
+      <img class="brand-logo" src="/brand/perceptra-wordmark-on-dark.svg" alt="Perceptra" width="148" height="38">
     </a>
     <div class="nav-links">
       <a href="#progetto" data-i18n="n_progetto"></a>
@@ -533,15 +518,8 @@ footer{border-top:1px solid var(--line);padding:64px 0 40px}
   <div class="wrap">
     <div class="f-grid">
       <div>
-        <a class="brand" href="#top">
-          <svg viewBox="0 0 100 100" aria-hidden="true" style="width:26px;height:26px">
-            <path fill="url(#lg1)" fill-rule="evenodd" d="M22 6 H80 V64 H50 V78 L22 98 Z M44 26 H64 V46 H44 Z"/>
-            <path fill="#112B3F" opacity=".55" d="M22 6 L44 26 V46 L22 64 Z"/>
-          </svg>
-          <span>
-            <span class="brand-name">Perceptra</span>
-            <span class="brand-tag">Audience Engine</span>
-          </span>
+        <a class="brand" href="#top" aria-label="Perceptra — home">
+          <img class="brand-logo brand-logo--full" src="/brand/perceptra-logo-on-dark.svg" alt="Perceptra — Audience Engine" width="241" height="62">
         </a>
         <p data-i18n="f_desc"></p>
       </div>

@@ -42,7 +42,8 @@ const organization = {
   email: 'hello@perceptra.eu',
   description: 'Istituto di ricerca che conduce studi qualitativi con audience sintetiche calibrate su panel umani reali.',
   slogan: 'Le reazioni del tuo mercato, prima del mercato.',
-  logo: ORIGIN + '/og.png',
+  logo: ORIGIN + '/brand/icon-512.png',
+  image: ORIGIN + '/og.png',
   areaServed: [
     { '@type': 'Country', name: 'Italy' },
     { '@type': 'Country', name: 'France' },
@@ -162,6 +163,9 @@ ${alt}
 <meta name="twitter:description" content="${m.desc}">
 <meta name="twitter:image" content="${ORIGIN}/og.png">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/brand/apple-touch-icon.png">
+<meta name="theme-color" content="#0B1D2D">
+<meta property="og:image:alt" content="Perceptra — Audience Engine">
 ${ld}
 `;
 }
@@ -262,11 +266,13 @@ Email: hello@perceptra.eu
 Sito: ${ORIGIN}
 `);
 
-writeFileSync('public/favicon.svg', `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><rect width="32" height="32" rx="7" fill="#0B1D2D"/><circle cx="16" cy="16" r="9" fill="none" stroke="#33D6E6" stroke-width="2.5"/><circle cx="16" cy="16" r="3" fill="#1FB5B6"/></svg>
-`);
+/* brand assets: official logo pack (brand/), favicon = official symbol */
+cpSync('brand', 'public/brand', { recursive: true });
+copyFileSync('brand/perceptra-symbol.svg', 'public/favicon.svg');
+
 
 /* carry over any other asset sitting next to index.html (og.png, etc.) */
-import { readdirSync, copyFileSync, statSync } from 'node:fs';
+import { readdirSync, copyFileSync, cpSync, statSync } from 'node:fs';
 for (const f of readdirSync('.')) {
   if (['index.html', 'seo.mjs', 'package.json', 'vercel.json', 'public', 'node_modules', '.git', 'CNAME'].includes(f)) continue;
   if (statSync(f).isFile()) copyFileSync(f, 'public/' + f);
