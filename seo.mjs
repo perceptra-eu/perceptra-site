@@ -165,7 +165,7 @@ ${alt}
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/brand/apple-touch-icon.png">
 <meta name="theme-color" content="#0B1D2D">
-<meta property="og:image:alt" content="Perceptra — Audience Engine">
+<meta property="og:image:alt" content="Perceptra — Market Intelligence">
 ${ld}
 `;
 }
