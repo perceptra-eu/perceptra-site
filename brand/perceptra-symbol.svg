@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="303 97 221 246" role="img" aria-label="Perceptra"><title>Perceptra</title><defs><linearGradient id="top" gradientUnits="userSpaceOnUse" x1="311" y1="130" x2="520" y2="135"><stop stop-color="#277a92"/><stop offset="1" stop-color="#32c4c7"/></linearGradient><linearGradient id="side" gradientUnits="userSpaceOnUse" x1="311" y1="180" x2="372" y2="200"><stop stop-color="#0e2e45"/><stop offset="1" stop-color="#102a40"/></linearGradient><linearGradient id="right" gradientUnits="userSpaceOnUse" x1="480" y1="162" x2="502" y2="241"><stop stop-color="#25b7c1"/><stop offset="1" stop-color="#1599ad"/></linearGradient><linearGradient id="lower" gradientUnits="userSpaceOnUse" x1="358" y1="289" x2="501" y2="244"><stop stop-color="#32c7dd"/><stop offset="1" stop-color="#2dc0d1"/></linearGradient><linearGradient id="tail" gradientUnits="userSpaceOnUse" x1="312" y1="337" x2="393" y2="287"><stop stop-color="#37c4dc"/><stop offset="1" stop-color="#1e779c"/></linearGradient></defs><g id="symbol">
+<path fill="url(#side)" d="M311 103 L372 163 L372 216 L311 279 Z"/>
+<path fill="url(#top)" d="M311 103 Q313 101 318 101 H456 Q463 101 469 107 L515 151 Q520 156 520 163 H372 Z"/>
+<path fill="#33bec4" d="M462 102 Q465 103 469 107 L515 151 Q520 156 520 163 H462 Z"/>
+<path fill="url(#right)" d="M462 163 H520 V236 Q520 240 517 243 L462 240 Z"/>
+<path fill="url(#tail)" d="M350 292 H399 L355 336 Q352 339 349 339 H307 Z"/>
+<path fill="url(#lower)" d="M400 240 H520 L474 288 Q470 292 465 292 H350 L393 244 Q396 240 400 240 Z"/>
+</g></svg>

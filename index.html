@@ -11,10 +11,10 @@
 <style>
 :root{
   --ink:#0B1D2D;
-  --panel:#112B3F;
+  --panel:#102A40;
   --panel-2:#0E2436;
-  --teal:#1FB5B6;
-  --cyan:#33D6E6;
+  --teal:#299DA8;
+  --cyan:#32C7DD;
   --paper:#F2F5F7;
   --muted:#8CA3B5;
   --line:rgba(140,163,181,.16);
@@ -74,9 +74,8 @@ nav{
 }
 .nav-in{max-width:var(--maxw);margin:0 auto;padding:0 24px;height:68px;display:flex;align-items:center;justify-content:space-between;gap:1rem}
 .brand{display:flex;align-items:center;gap:.7rem}
-.brand svg{width:30px;height:30px}
-.brand-name{font-family:'Archivo',sans-serif;font-weight:700;font-size:1.12rem;letter-spacing:-.01em}
-.brand-tag{font-family:'IBM Plex Mono',monospace;font-size:.58rem;letter-spacing:.24em;color:var(--teal);text-transform:uppercase;display:block;margin-top:-2px}
+.brand-logo{height:38px;width:auto}
+.brand-logo--full{height:62px}
 .nav-links{display:flex;gap:2rem;align-items:center}
 .nav-links a{font-size:.92rem;color:var(--muted);transition:color .2s}
 .nav-links a:hover,.nav-links a:focus-visible{color:var(--paper)}
@@ -88,7 +87,7 @@ nav{
 }
 .btn:focus-visible,a:focus-visible,.lang button:focus-visible{outline:2px solid var(--cyan);outline-offset:3px}
 .btn-primary{background:linear-gradient(120deg,var(--cyan),var(--teal));color:var(--ink)}
-.btn-primary:hover{transform:translateY(-1px);box-shadow:0 8px 30px rgba(51,214,230,.25)}
+.btn-primary:hover{transform:translateY(-1px);box-shadow:0 8px 30px rgba(50,199,221,.25)}
 .btn-ghost{background:transparent;color:var(--paper);border:1px solid rgba(140,163,181,.35)}
 .btn-ghost:hover{border-color:var(--cyan);color:var(--cyan)}
 .nav-cta{padding:.6rem 1.2rem;font-size:.88rem}
@@ -96,7 +95,7 @@ nav{
 /* ---------- lang switcher ---------- */
 .lang{
   display:flex;gap:2px;border:1px solid var(--line);border-radius:999px;
-  padding:3px;background:rgba(17,43,63,.6);
+  padding:3px;background:rgba(16,42,64,.6);
 }
 .lang button{
   font-family:'IBM Plex Mono',monospace;font-size:.66rem;letter-spacing:.08em;
@@ -110,7 +109,7 @@ nav{
 .hero{border-top:0;padding:96px 0 110px;position:relative;overflow:hidden}
 .hero::after{
   content:"";position:absolute;inset:auto -20% -55% -20%;height:70%;
-  background:radial-gradient(ellipse at center,rgba(31,181,182,.13),transparent 65%);
+  background:radial-gradient(ellipse at center,rgba(41,157,168,.13),transparent 65%);
   pointer-events:none;
 }
 .hero-grid{display:grid;grid-template-columns:1.05fr .95fr;gap:4.5rem;align-items:center;position:relative;z-index:1}
@@ -137,8 +136,8 @@ nav{
 .console-q span{color:var(--muted)}
 .dots{display:grid;grid-template-columns:repeat(20,1fr);gap:7px;padding:1.1rem 1.2rem 1.3rem}
 .dot{aspect-ratio:1;border-radius:50%;background:rgba(140,163,181,.18);transition:background .45s,box-shadow .45s,transform .45s}
-.dot.on{background:var(--cyan);box-shadow:0 0 10px rgba(51,214,230,.55);transform:scale(1.12)}
-.dot.on.b{background:var(--teal);box-shadow:0 0 8px rgba(31,181,182,.45)}
+.dot.on{background:var(--cyan);box-shadow:0 0 10px rgba(50,199,221,.55);transform:scale(1.12)}
+.dot.on.b{background:var(--teal);box-shadow:0 0 8px rgba(41,157,168,.45)}
 .console-stats{display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid var(--line)}
 .cstat{padding:1rem 1.2rem;border-right:1px solid var(--line)}
 .cstat:last-child{border-right:0}
@@ -186,7 +185,7 @@ nav{
 .score p{color:var(--muted);font-size:.95rem;margin-top:1.2rem;max-width:34ch}
 .threshold{
   margin-top:1.4rem;padding:.8rem 1rem;border-left:2px solid var(--cyan);
-  background:rgba(51,214,230,.06);font-size:.78rem;color:var(--paper);border-radius:0 8px 8px 0;
+  background:rgba(50,199,221,.06);font-size:.78rem;color:var(--paper);border-radius:0 8px 8px 0;
   font-family:'IBM Plex Mono',monospace;
 }
 
@@ -206,7 +205,7 @@ nav{
 /* ---------- team ---------- */
 .team{display:grid;grid-template-columns:repeat(4,1fr);gap:1.1rem}
 .member{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:1.7rem 1.5rem;transition:border-color .25s,transform .25s}
-.member:hover{border-color:rgba(51,214,230,.4);transform:translateY(-3px)}
+.member:hover{border-color:rgba(50,199,221,.4);transform:translateY(-3px)}
 .avatar{
   width:52px;height:52px;border-radius:12px;margin-bottom:1.1rem;
   background:linear-gradient(135deg,var(--teal),var(--panel));
@@ -220,7 +219,7 @@ nav{
 /* ---------- positioning strip ---------- */
 .strip{
   border:1px solid var(--line);border-radius:var(--radius);
-  background:linear-gradient(120deg,rgba(31,181,182,.1),rgba(17,43,63,.6));
+  background:linear-gradient(120deg,rgba(41,157,168,.1),rgba(16,42,64,.6));
   padding:2.4rem 2.6rem;display:grid;grid-template-columns:1fr auto;gap:2rem;align-items:center;
 }
 .strip h3{font-size:1.45rem;max-width:30ch}
@@ -262,21 +261,7 @@ footer{border-top:1px solid var(--line);padding:64px 0 40px}
 <nav>
   <div class="nav-in">
     <a class="brand" href="#top" aria-label="Perceptra — home">
-      <svg viewBox="0 0 100 100" aria-hidden="true">
-        <defs>
-          <linearGradient id="lg1" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0" stop-color="#33D6E6"/><stop offset="1" stop-color="#1FB5B6"/>
-          </linearGradient>
-        </defs>
-        <path fill="url(#lg1)" fill-rule="evenodd"
-          d="M22 6 H80 V64 H50 V78 L22 98 Z M44 26 H64 V46 H44 Z"/>
-        <path fill="#112B3F" opacity=".55" d="M22 6 L44 26 V46 L22 64 Z"/>
-        <path fill="#0B1D2D" opacity=".35" d="M50 64 V78 L22 98 V64 Z"/>
-      </svg>
-      <span>
-        <span class="brand-name">Perceptra</span>
-        <span class="brand-tag">Audience Engine</span>
-      </span>
+      <img class="brand-logo" src="/brand/perceptra-wordmark-on-dark.svg" alt="Perceptra" width="148" height="38">
     </a>
     <div class="nav-links">
       <a href="#progetto" data-i18n="n_progetto"></a>
@@ -407,11 +392,11 @@ footer{border-top:1px solid var(--line);padding:64px 0 40px}
           <polyline id="line-h" points="40,150 80,132 120,140 160,118 200,124 240,102 280,108 320,90 360,96 400,82 440,86 500,74"
             fill="none" stroke="#F2F5F7" stroke-width="2.5" stroke-linecap="round"/>
           <polyline id="line-s" points="40,190 80,158 120,152 160,134 200,131 240,112 280,113 320,97 360,99 400,86 440,88 500,76"
-            fill="none" stroke="#33D6E6" stroke-width="2.5" stroke-linecap="round"/>
+            fill="none" stroke="#32C7DD" stroke-width="2.5" stroke-linecap="round"/>
         </svg>
         <div class="legend">
           <span><i style="background:#F2F5F7"></i><span data-i18n="sh_leg_h"></span></span>
-          <span><i style="background:#33D6E6"></i><span data-i18n="sh_leg_s"></span></span>
+          <span><i style="background:#32C7DD"></i><span data-i18n="sh_leg_s"></span></span>
         </div>
       </div>
       <div class="score">
@@ -533,15 +518,8 @@ footer{border-top:1px solid var(--line);padding:64px 0 40px}
   <div class="wrap">
     <div class="f-grid">
       <div>
-        <a class="brand" href="#top">
-          <svg viewBox="0 0 100 100" aria-hidden="true" style="width:26px;height:26px">
-            <path fill="url(#lg1)" fill-rule="evenodd" d="M22 6 H80 V64 H50 V78 L22 98 Z M44 26 H64 V46 H44 Z"/>
-            <path fill="#112B3F" opacity=".55" d="M22 6 L44 26 V46 L22 64 Z"/>
-          </svg>
-          <span>
-            <span class="brand-name">Perceptra</span>
-            <span class="brand-tag">Audience Engine</span>
-          </span>
+        <a class="brand" href="#top" aria-label="Perceptra — home">
+          <img class="brand-logo brand-logo--full" src="/brand/perceptra-logo-on-dark.svg" alt="Perceptra — Audience Engine" width="241" height="62">
         </a>
         <p data-i18n="f_desc"></p>
       </div>
