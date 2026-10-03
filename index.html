@@ -91,6 +91,8 @@ nav{
 .btn-ghost{background:transparent;color:var(--paper);border:1px solid rgba(140,163,181,.35)}
 .btn-ghost:hover{border-color:var(--cyan);color:var(--cyan)}
 .nav-cta{padding:.6rem 1.2rem;font-size:.88rem}
+.nav-login{font-size:.92rem;color:var(--paper)}
+.nav-links a.btn-primary,.nav-links a.btn-primary:hover{color:var(--ink)}
 
 /* ---------- lang switcher ---------- */
 .lang{
@@ -310,7 +312,8 @@ footer{border-top:1px solid var(--line);padding:64px 0 40px}
         <button data-lang="en">EN</button>
         <button data-lang="fr">FR</button>
       </div>
-      <a href="#contatti" class="btn btn-primary nav-cta" data-i18n="n_cta"></a>
+      <a href="https://app.perceptra.eu/login" class="nav-login" data-app="login" data-utm="nav" data-i18n="n_login"></a>
+      <a href="https://app.perceptra.eu/signup" class="btn btn-primary nav-cta" data-app="signup" data-utm="nav" data-i18n="n_signup"></a>
     </div>
   </div>
 </nav>
@@ -323,7 +326,7 @@ footer{border-top:1px solid var(--line);padding:64px 0 40px}
       <h1 style="margin-top:1.2rem" data-i18n="h_title"></h1>
       <p class="lead" data-i18n="h_lead"></p>
       <div class="hero-ctas">
-        <a href="#contatti" class="btn btn-primary" data-i18n="h_cta1"></a>
+        <a href="https://app.perceptra.eu/signup" class="btn btn-primary" data-app="signup" data-utm="hero" data-i18n="h_cta1"></a>
         <a href="#metodo" class="btn btn-ghost" data-i18n="h_cta2"></a>
       </div>
       <p class="hero-note" data-i18n="h_note"></p>
@@ -598,6 +601,7 @@ footer{border-top:1px solid var(--line);padding:64px 0 40px}
         <h4 data-i18n="f_contact_h"></h4>
         <a href="mailto:hello@perceptra.eu">hello@perceptra.eu</a>
         <a href="#contatti" data-i18n="n_cta"></a>
+        <a href="https://app.perceptra.eu/login" data-app="login" data-utm="footer" data-i18n="n_login"></a>
       </div>
     </div>
     <div class="f-bottom">
@@ -616,10 +620,12 @@ it:{
   n_metodo:"Metodo",
   n_chi:"Chi siamo",
   n_cta:"Richiedi una demo",
+  n_login:"Accedi",
+  n_signup:"Crea un account",
   h_eyebrow:"Market intelligence per il B2B europeo",
   h_title:"I numeri del tuo mercato, <span class='hl'>anche dove nessuno li ha misurati.</span>",
   h_lead:"Perceptra ricostruisce quanto vale il mercato del tuo prodotto nella tua area, chi sono gli operatori e quale quota occupi. Con una metodologia proprietaria che sceglie fonti e modelli di stima, e con la prova di ogni numero.",
-  h_cta1:"Richiedi una demo",
+  h_cta1:"Crea il tuo account",
   h_cta2:"Come lavoriamo",
   h_note:"Servizio gestito end-to-end · Ogni numero con <b>fonte e rating</b>",
   c_title:"Esempio · Studio di mercato",
@@ -738,10 +744,12 @@ en:{
   n_metodo:"Method",
   n_chi:"About us",
   n_cta:"Request a demo",
+  n_login:"Log in",
+  n_signup:"Create an account",
   h_eyebrow:"Market intelligence for European B2B",
   h_title:"Your market in numbers, <span class='hl'>even where no one has measured it.</span>",
   h_lead:"Perceptra reconstructs what your product's market is worth in your area, who the operators are and how much of it you hold. With a proprietary methodology that chooses sources and estimation models, and with proof behind every figure.",
-  h_cta1:"Request a demo",
+  h_cta1:"Create your account",
   h_cta2:"How we work",
   h_note:"End-to-end managed service · Every figure with <b>source and rating</b>",
   c_title:"Example · Market study",
@@ -860,10 +868,12 @@ fr:{
   n_metodo:"Méthode",
   n_chi:"Qui sommes-nous",
   n_cta:"Demander une démo",
+  n_login:"Se connecter",
+  n_signup:"Créer un compte",
   h_eyebrow:"Market intelligence pour le B2B européen",
   h_title:"Les chiffres de votre marché, <span class='hl'>même là où personne ne les a mesurés.</span>",
   h_lead:"Perceptra reconstitue la valeur du marché de votre produit dans votre zone, les acteurs qui l'occupent et votre part. Avec une méthodologie propriétaire qui choisit les sources et les modèles d'estimation, et la preuve de chaque chiffre.",
-  h_cta1:"Demander une démo",
+  h_cta1:"Créer votre compte",
   h_cta2:"Notre méthode",
   h_note:"Service géré de bout en bout · Chaque chiffre avec <b>source et notation</b>",
   c_title:"Exemple · Étude de marché",
@@ -986,6 +996,11 @@ function setLang(l){
   document.querySelectorAll('[data-i18n]').forEach(el=>{
     const k=el.getAttribute('data-i18n');
     if(d[k]!==undefined) el.innerHTML=d[k];
+  });
+  const appLang = l==='fr' ? 'fr' : 'en';
+  document.querySelectorAll('a[data-app]').forEach(a=>{
+    a.href = 'https://app.perceptra.eu/'+a.dataset.app+'?lang='+appLang
+      +'&utm_source=perceptra.eu&utm_medium=site&utm_campaign='+(a.dataset.utm||'site');
   });
   document.querySelectorAll('.lang button').forEach(b=>{
     b.classList.toggle('active', b.dataset.lang===l);
