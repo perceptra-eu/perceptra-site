@@ -14,22 +14,22 @@ const META = {
     lang: 'it-IT',
     path: '/',
     file: 'index.html',
-    title: 'Perceptra \u2014 Ricerca di mercato con focus group sintetici in 72 ore',
-    desc: 'Perceptra conduce studi qualitativi con audience sintetiche calibrate su panel umani reali. Report in 72 ore, ogni insight con il suo punteggio di affidabilit\u00e0 (SHCS).'
+    title: 'Perceptra \u2014 Market intelligence per PMI e B2B: dimensione del mercato, quote e concorrenti',
+    desc: 'Perceptra ricostruisce i numeri del tuo mercato: dimensioni per prodotto e area, quote, operatori e previsioni. Metodologia proprietaria, ogni numero con fonte e rating di affidabilit\u00e0.'
   },
   en: {
     lang: 'en',
     path: '/en',
     file: 'en.html',
-    title: 'Perceptra \u2014 Market research with synthetic focus groups in 72 hours',
-    desc: 'Perceptra runs qualitative studies with synthetic audiences calibrated on real human panels. Reports in 72 hours, every insight scored for reliability (SHCS).'
+    title: 'Perceptra \u2014 Market intelligence for SMEs and B2B: market size, shares and competitors',
+    desc: 'Perceptra rebuilds the numbers of your market: size by product and area, market shares, operators and forecasts. Proprietary methodology, every figure with its source and reliability rating.'
   },
   fr: {
     lang: 'fr',
     path: '/fr',
     file: 'fr.html',
-    title: 'Perceptra \u2014 \u00c9tudes de march\u00e9 avec focus groups synth\u00e9tiques en 72 heures',
-    desc: 'Perceptra m\u00e8ne des \u00e9tudes qualitatives avec des audiences synth\u00e9tiques calibr\u00e9es sur des panels humains r\u00e9els. Rapports en 72 heures, chaque insight avec son score de fiabilit\u00e9 (SHCS).'
+    title: 'Perceptra \u2014 Market intelligence pour PME et B2B : taille du march\u00e9, parts et concurrents',
+    desc: 'Perceptra reconstitue les chiffres de votre march\u00e9 : taille par produit et par zone, parts de march\u00e9, acteurs et pr\u00e9visions. M\u00e9thodologie propri\u00e9taire, chaque chiffre avec sa source et sa notation de fiabilit\u00e9.'
   }
 };
 
@@ -40,8 +40,8 @@ const organization = {
   name: 'Perceptra',
   url: ORIGIN,
   email: 'hello@perceptra.eu',
-  description: 'Istituto di ricerca che conduce studi qualitativi con audience sintetiche calibrate su panel umani reali.',
-  slogan: 'Le reazioni del tuo mercato, prima del mercato.',
+  description: 'Societ\u00e0 di market intelligence che ricostruisce dimensioni, quote e operatori dei mercati B2B con una metodologia proprietaria; conduce anche studi con audience sintetiche calibrate su panel umani.',
+  slogan: 'I numeri del tuo mercato, anche dove nessuno li ha misurati.',
   logo: ORIGIN + '/brand/icon-512.png',
   image: ORIGIN + '/og.png',
   areaServed: [
@@ -58,29 +58,46 @@ const organization = {
   }]
 };
 
+const AREAS = [
+  { '@type': 'Country', name: 'Italy' },
+  { '@type': 'Country', name: 'France' },
+  { '@type': 'Place', name: 'European Union' }
+];
+
 const service = {
   '@context': 'https://schema.org',
   '@type': 'Service',
-  '@id': ORIGIN + '/#service',
-  name: 'Focus group sintetici calibrati',
-  serviceType: 'Ricerca di mercato qualitativa',
+  '@id': ORIGIN + '/#market-intelligence',
+  name: 'Market Intelligence',
+  serviceType: 'Ricerca di mercato quantitativa e market sizing',
   provider: { '@id': ORIGIN + '/#organization' },
-  areaServed: [
-    { '@type': 'Country', name: 'Italy' },
-    { '@type': 'Country', name: 'France' },
-    { '@type': 'Place', name: 'European Union' }
-  ],
+  areaServed: AREAS,
   audience: {
     '@type': 'BusinessAudience',
-    audienceType: 'Agenzie creative, brand mid-market, startup'
+    audienceType: 'PMI e startup B2B, produttori e distributori, agenzie di marketing, commercialisti e società di consulenza'
   },
-  description: 'Studi qualitativi condotti su audience sintetiche calibrate su panel umani reali. Consegna del report in 72 ore, con punteggio di affidabilit\u00e0 SHCS per ogni insight.',
+  description: 'Dimensione del mercato per prodotto e area geografica, quote di mercato, mappa degli operatori e stime previsionali. I dati mancanti sono ricostruiti con una metodologia proprietaria; ogni numero riporta fonte, ipotesi e rating di affidabilità.',
   offers: {
     '@type': 'Offer',
     priceCurrency: 'EUR',
     availability: 'https://schema.org/InStock',
     url: ORIGIN
   }
+};
+
+const serviceAudiences = {
+  '@context': 'https://schema.org',
+  '@type': 'Service',
+  '@id': ORIGIN + '/#synthetic-audiences',
+  name: 'Audience sintetiche',
+  serviceType: 'Ricerca di mercato qualitativa',
+  provider: { '@id': ORIGIN + '/#organization' },
+  areaServed: AREAS,
+  audience: {
+    '@type': 'BusinessAudience',
+    audienceType: 'Brand e agenzie nel settore dei beni di consumo'
+  },
+  description: 'Focus group simulati con audience sintetiche calibrate su un panel umano di controllo, per concept, claim, packaging e pricing test. Ogni studio riporta lo SHCS e non viene consegnato sotto 0,80.'
 };
 
 const website = {
@@ -99,40 +116,48 @@ const faq = {
   mainEntity: [
     {
       '@type': 'Question',
-      name: 'Che cosa sono i focus group sintetici di Perceptra?',
+      name: "Che cosa fa Perceptra?",
       acceptedAnswer: {
         '@type': 'Answer',
-        text: 'Sono studi qualitativi in cui le risposte vengono generate da audience sintetiche: profili costruiti per rispecchiare un target reale. Ogni studio Perceptra \u00e8 calibrato su un panel di persone reali, cos\u00ec la distribuzione delle risposte sintetiche pu\u00f2 essere confrontata con quella umana.'
+        text: "Ricostruisce i numeri di un mercato B2B: dimensione per prodotto e area geografica, quote di mercato, operatori e previsioni. Quando i dati non sono disponibili direttamente, li stima incrociando pi\u00f9 fonti e metodi."
       }
     },
     {
       '@type': 'Question',
-      name: "Che cos'\u00e8 lo SHCS?",
+      name: "Come stimate un mercato se i dati non esistono?",
       acceptedAnswer: {
         '@type': 'Answer',
-        text: 'Lo SHCS (Synthetic-Human Correlation Score) misura quanto le distribuzioni di risposta sintetiche corrispondono a quelle umane, domanda per domanda. Viene riportato in ogni studio Perceptra, cos\u00ec il cliente sa quanto fidarsi di ciascun insight.'
+        text: "Con una metodologia proprietaria: scegliamo le fonti (statistiche ufficiali, commercio estero, registri delle imprese, bilanci, web) e pi\u00f9 approcci di stima indipendenti, poi li confrontiamo. Ipotesi e metodo sono sempre dichiarati nel report."
       }
     },
     {
       '@type': 'Question',
-      name: 'Quanto tempo serve per ricevere uno studio?',
+      name: "Che cos'\u00e8 il rating di affidabilit\u00e0?",
       acceptedAnswer: {
         '@type': 'Answer',
-        text: 'Il report viene consegnato entro 72 ore dalla conferma dello studio, contro le settimane richieste da un focus group tradizionale.'
+        text: "Ogni dato riporta due lettere da A a E: la prima indica l'affidabilit\u00e0 della fonte, la seconda la qualit\u00e0 del dato. Ogni numero del report si pu\u00f2 ricondurre al calcolo, all'evidenza e alla fonte da cui deriva."
       }
     },
     {
       '@type': 'Question',
-      name: 'A chi si rivolge Perceptra?',
+      name: "Perceptra fa ancora focus group sintetici?",
       acceptedAnswer: {
         '@type': 'Answer',
-        text: 'Ad agenzie creative, brand del mid-market e startup che hanno bisogno di ricerca di qualit\u00e0 enterprise con tempi e costi compatibili con la loro realt\u00e0 operativa.'
+        text: "S\u00ec. Per i beni di consumo conduciamo studi con audience sintetiche calibrate su un panel umano di controllo; ogni studio riporta lo SHCS e non viene consegnato sotto 0,80."
+      }
+    },
+    {
+      '@type': 'Question',
+      name: "A chi si rivolge Perceptra?",
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: "A PMI e startup B2B, produttori e distributori, agenzie di marketing, commercialisti e societ\u00e0 di consulenza che hanno bisogno dei numeri reali del proprio mercato senza un budget da grande impresa."
       }
     }
   ]
 };
 
-const ld = [organization, website, service, faq]
+const ld = [organization, website, service, serviceAudiences, faq]
   .map(o => `<script type="application/ld+json">${JSON.stringify(o)}</script>`)
   .join('\n');
 
@@ -241,22 +266,33 @@ Sitemap: ${ORIGIN}/sitemap.xml
 
 writeFileSync('public/llms.txt', `# Perceptra
 
-> Perceptra \u00e8 un istituto di ricerca che conduce studi qualitativi con audience sintetiche
-> calibrate su panel umani reali. I report sono consegnati in 72 ore e ogni insight riporta
-> il suo punteggio di affidabilit\u00e0 (SHCS).
+> Perceptra è una società di market intelligence per il B2B europeo. Ricostruisce i numeri
+> di un mercato (dimensione per prodotto e area, quote, operatori, previsioni) anche quando i dati
+> non esistono già pronti, con una metodologia proprietaria. Ogni numero riporta fonte e rating.
 
-## Cosa fa
-- Concept test, packaging test, test di claim, pricing e naming.
-- Studi condotti su audience sintetiche costruite per rispecchiare un target reale.
-- Ogni studio include un panel umano di controllo: la calibrazione \u00e8 una scelta di progetto, non un'opzione premium.
+## Market Intelligence (servizio principale)
+- Dimensione del mercato per prodotto e area geografica.
+- Quote di mercato e posizionamento.
+- Mappa degli operatori: concorrenti, fornitori, canali.
+- Stime previsionali e potenziale indirizzabile.
+- Report decisionale con fonti, ipotesi, metodo e livello di confidenza.
 
-## SHCS (Synthetic-Human Correlation Score)
-Misura la corrispondenza tra le distribuzioni di risposta sintetiche e quelle umane, domanda per domanda.
-Viene riportato in ogni studio, cos\u00ec il cliente sa quanto fidarsi di ciascun insight.
+## Metodo
+1. Inquadramento: prodotto, classificazioni statistiche, area, orizzonte temporale.
+2. Fonti e modelli: statistiche ufficiali, commercio estero, registri delle imprese, bilanci, web.
+3. Ricostruzione e triangolazione: lo stesso numero stimato con approcci indipendenti.
+4. Report decisionale.
+
+## Affidabilità
+Ogni numero si può ricondurre a calcolo, evidenza e fonte. Ogni dato ha un rating di due lettere
+(A–E): affidabilità della fonte e qualità del dato.
+
+## Audience sintetiche (beni di consumo)
+Focus group simulati con audience sintetiche calibrate su un panel umano di controllo.
+Ogni studio riporta lo SHCS (Synthetic-Human Correlation Score); sotto 0,80 non viene consegnato.
 
 ## Per chi
-Agenzie creative, brand del mid-market e startup: chi ha bisogno di ricerca di qualit\u00e0 enterprise
-con tempi e costi sostenibili.
+PMI e startup B2B, produttori e distributori, agenzie di marketing, commercialisti e società di consulenza.
 
 ## Lingue e mercati
 Italiano (/), inglese (/en), francese (/fr). Mercati serviti: Italia, Francia, Unione Europea.
