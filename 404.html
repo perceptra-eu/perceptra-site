@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pagina non trovata · Page not found — Perceptra</title>
+<meta name="robots" content="noindex">
+<meta name="color-scheme" content="light dark">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<style>
+:root{color-scheme:light;--bg:#F5F8F9;--surface:#FFFFFF;--text:#0B1D2D;--text-2:#33495C;--muted:#566B7D;--line:#D7E1E7;--accent:#13707A;--btn-bg:#0B1D2D;--btn-fg:#FFFFFF;--grid:rgba(11,29,45,.055)}
+@media (prefers-color-scheme:dark){:root{color-scheme:dark;--bg:#0B1D2D;--surface:#102A40;--text:#F2F5F7;--text-2:#C3D1DB;--muted:#8FA6B8;--line:rgba(140,163,181,.18);--accent:#32C7DD;--btn-bg:#32C7DD;--btn-fg:#0B1D2D;--grid:rgba(140,163,181,.07)}}
+*{box-sizing:border-box;margin:0;padding:0}
+body{min-height:100vh;display:grid;place-items:center;padding:32px 16px;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;line-height:1.6;
+  background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:48px 48px}
+main{max-width:560px;width:100%;background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:clamp(24px,5vw,40px)}
+img{height:30px;width:auto;display:block}
+.dark{display:none}
+@media (prefers-color-scheme:dark){.light{display:none}.dark{display:block}}
+.code{margin-top:28px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.8rem;letter-spacing:.08em;text-transform:uppercase;color:var(--accent)}
+h1{font-family:Georgia,'Times New Roman',serif;font-weight:500;font-size:clamp(1.8rem,5vw,2.4rem);line-height:1.1;letter-spacing:-.01em;margin:.4rem 0 .8rem}
+p{color:var(--text-2)}
+ul{list-style:none;margin-top:24px;border-top:1px solid var(--line)}
+li{border-bottom:1px solid var(--line)}
+a.row{display:flex;justify-content:space-between;align-items:center;min-height:52px;color:var(--text);text-decoration:none;font-weight:500}
+a.row span{color:var(--muted);font-size:.9rem;font-weight:400}
+a.row:hover{color:var(--accent)}
+a:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:6px}
+</style>
+</head>
+<body>
+<main>
+  <img class="light" src="/brand/perceptra-wordmark-on-light.svg" alt="Perceptra" width="117" height="30">
+  <img class="dark" src="/brand/perceptra-wordmark-on-dark.svg" alt="Perceptra" width="117" height="30">
+  <p class="code">404</p>
+  <h1>Questa pagina non esiste.</h1>
+  <p>Il numero che cerchi è altrove. <span lang="en">This page doesn't exist.</span> <span lang="fr">Cette page n'existe pas.</span></p>
+  <ul>
+    <li><a class="row" href="/" hreflang="it">Torna alla home <span>IT →</span></a></li>
+    <li><a class="row" href="/en" hreflang="en" lang="en">Back to the home page <span>EN →</span></a></li>
+    <li><a class="row" href="/fr" hreflang="fr" lang="fr">Retour à l'accueil <span>FR →</span></a></li>
+  </ul>
+</main>
+</body>
+</html>

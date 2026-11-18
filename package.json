@@ -2,6 +2,7 @@
   "name": "perceptra-site",
   "private": true,
   "scripts": {
-    "build": "rm -rf public && mkdir public && node seo.mjs"
+    "build": "rm -rf public && mkdir public && node seo.mjs",
+    "dev": "node scripts/dev-server.mjs"
   }
 }

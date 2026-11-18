@@ -4,604 +4,788 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Perceptra — Market Intelligence</title>
-<meta name="description" id="meta-desc" content="Perceptra simula focus group con audience sintetiche calibrate su panel umani reali. Ogni insight è misurato con lo SHCS.">
+<meta name="description" id="meta-desc" content="Perceptra ricostruisce i numeri del tuo mercato: dimensione per prodotto e area, quote, operatori e previsioni. Metodo proprietario, fonte e rating su ogni numero.">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#F5F8F9" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0B1D2D" media="(prefers-color-scheme: dark)">
+<script>
+/* before first paint: mark JS as available and apply a saved theme choice */
+(function(){var d=document.documentElement;d.classList.add('js');try{var t=localStorage.getItem('perceptra-theme');if(t==='light'||t==='dark')d.setAttribute('data-theme',t);}catch(e){}})();
+</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800&family=Instrument+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400..600;1,6..72,400..600&family=Instrument+Sans:wght@400..600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
+/* =====================================================================
+   Perceptra site — design tokens
+   Brand: navy #0B1D2D · panel #102A40 · teal #299DA8 · cyan #32C7DD · paper #F2F5F7
+   ===================================================================== */
 :root{
-  --ink:#0B1D2D;
-  --panel:#102A40;
-  --panel-2:#0E2436;
-  --teal:#299DA8;
-  --cyan:#32C7DD;
-  --paper:#F2F5F7;
-  --muted:#8CA3B5;
-  --line:rgba(140,163,181,.16);
-  --maxw:1140px;
-  --radius:14px;
+  --navy:#0B1D2D;--navy-2:#102A40;--navy-3:#0E2436;--teal:#299DA8;--cyan:#32C7DD;--paper:#F2F5F7;
+  --maxw:1200px;--gutter:clamp(16px,4vw,32px);
+  --r-sm:8px;--r:14px;--r-lg:20px;
+  --f-display:'Newsreader',Georgia,'Times New Roman',serif;
+  --f-sans:'Instrument Sans',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+  --f-mono:'IBM Plex Mono',ui-monospace,SFMono-Regular,Menlo,monospace;
+  --ease:cubic-bezier(.2,.7,.2,1);
+  --header-h:68px;
+
+  /* light theme (default) */
+  color-scheme:light;
+  --bg:#F5F8F9;--bg-alt:#ECF2F4;--surface:#FFFFFF;--surface-2:#F1F6F7;
+  --text:#0B1D2D;--text-2:#33495C;--muted:#566B7D;
+  --line:#D7E1E7;--line-2:#BACAD4;
+  --accent:#13707A;--fill:#299DA8;--glow:#32C7DD;--tint:rgba(41,157,168,.10);
+  --btn-bg:#0B1D2D;--btn-fg:#FFFFFF;--btn-hover:#1A3A54;
+  --grid:rgba(11,29,45,.055);
+  --shadow:0 1px 2px rgba(11,29,45,.05),0 22px 48px -22px rgba(11,29,45,.28);
+  --header-bg:rgba(245,248,249,.84);
+  --band-bg:#0B1D2D;
 }
-*{margin:0;padding:0;box-sizing:border-box}
-html{scroll-behavior:smooth}
-body{
-  background:var(--ink);
-  color:var(--paper);
-  font-family:'Instrument Sans',system-ui,sans-serif;
-  font-size:17px;
-  line-height:1.65;
-  -webkit-font-smoothing:antialiased;
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --bg:#0B1D2D;--bg-alt:#0E2436;--surface:#102A40;--surface-2:#0E2436;
+    --text:#F2F5F7;--text-2:#C3D1DB;--muted:#8FA6B8;
+    --line:rgba(140,163,181,.18);--line-2:rgba(140,163,181,.34);
+    --accent:#32C7DD;--fill:#299DA8;--glow:#32C7DD;--tint:rgba(50,199,221,.09);
+    --btn-bg:#32C7DD;--btn-fg:#0B1D2D;--btn-hover:#62D6E8;
+    --grid:rgba(140,163,181,.07);
+    --shadow:0 1px 2px rgba(0,0,0,.35),0 26px 60px -24px rgba(0,0,0,.75);
+    --header-bg:rgba(11,29,45,.84);
+    --band-bg:#07141F;
+  }
 }
-::selection{background:var(--cyan);color:var(--ink)}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:#0B1D2D;--bg-alt:#0E2436;--surface:#102A40;--surface-2:#0E2436;
+  --text:#F2F5F7;--text-2:#C3D1DB;--muted:#8FA6B8;
+  --line:rgba(140,163,181,.18);--line-2:rgba(140,163,181,.34);
+  --accent:#32C7DD;--fill:#299DA8;--glow:#32C7DD;--tint:rgba(50,199,221,.09);
+  --btn-bg:#32C7DD;--btn-fg:#0B1D2D;--btn-hover:#62D6E8;
+  --grid:rgba(140,163,181,.07);
+  --shadow:0 1px 2px rgba(0,0,0,.35),0 26px 60px -24px rgba(0,0,0,.75);
+  --header-bg:rgba(11,29,45,.84);
+  --band-bg:#07141F;
+}
+
+/* ---------- base ---------- */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;scroll-padding-top:calc(var(--header-h) + 16px);-webkit-text-size-adjust:100%}
+body{background:var(--bg);color:var(--text);font-family:var(--f-sans);font-size:17px;line-height:1.6;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+::selection{background:var(--glow);color:var(--navy)}
 a{color:inherit;text-decoration:none}
-img{max-width:100%;display:block}
+img,svg{display:block;max-width:100%}
+button{font:inherit;color:inherit}
+ul,ol{list-style:none}
+:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:6px}
+.sr-only{position:absolute!important;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+.skip{position:absolute;left:var(--gutter);top:-120px;z-index:100;background:var(--btn-bg);color:var(--btn-fg);padding:.75rem 1.1rem;border-radius:var(--r-sm);font-weight:600}
+.skip:focus{top:12px}
 
 /* ---------- type ---------- */
-h1,h2,h3{font-family:'Archivo',sans-serif;line-height:1.08;letter-spacing:-.02em}
-h1{font-size:clamp(2.4rem,5.4vw,4.2rem);font-weight:800}
-h2{font-size:clamp(1.8rem,3.6vw,2.7rem);font-weight:700}
-h3{font-size:1.15rem;font-weight:700;letter-spacing:-.01em}
-.eyebrow{
-  font-family:'IBM Plex Mono',monospace;
-  font-size:.72rem;font-weight:500;
-  letter-spacing:.22em;text-transform:uppercase;
-  color:var(--teal);
-  display:flex;align-items:center;gap:.8rem;
-}
-.eyebrow::before{content:"";width:26px;height:1px;background:var(--teal);flex:none}
-.lead{color:var(--muted);font-size:1.08rem;max-width:56ch}
-.mono{font-family:'IBM Plex Mono',monospace}
+h1,h2{font-family:var(--f-display);font-weight:500;letter-spacing:-.02em;font-optical-sizing:auto;text-wrap:balance}
+h1{font-size:clamp(2.55rem,5.3vw,4.4rem);line-height:1.03}
+h2{font-size:clamp(2rem,3.6vw,3rem);line-height:1.08}
+h1 em,h2 em{font-style:italic;color:var(--accent)}
+h2 em{display:block}
+h3{font-weight:600;font-size:1.18rem;line-height:1.3;letter-spacing:-.01em}
+p{text-wrap:pretty}
+.lead{font-size:clamp(1.06rem,1.35vw,1.2rem);line-height:1.6;color:var(--text-2);max-width:60ch}
+.label{font-family:var(--f-mono);font-size:.78rem;font-weight:500;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);line-height:1.4}
+.eyebrow{display:inline-flex;align-items:center;gap:.65rem}
+/* split square: the two-letter rating, reduced to a mark */
+.eyebrow::before{content:"";flex:none;width:.6rem;height:.6rem;border-radius:2px;background:linear-gradient(135deg,var(--glow) 0 50%,var(--fill) 50% 100%)}
 
-/* ---------- layout primitives ---------- */
-.wrap{max-width:var(--maxw);margin:0 auto;padding:0 24px}
-section{padding:104px 0;border-top:1px solid var(--line)}
-.sec-head{display:grid;gap:1.1rem;margin-bottom:3.2rem;max-width:720px}
+/* ---------- layout ---------- */
+.wrap{max-width:var(--maxw);margin:0 auto;padding:0 var(--gutter)}
+.section{padding:clamp(60px,9vw,124px) 0}
+.section+.section{border-top:1px solid var(--line)}
+.alt{background:var(--bg-alt)}
+.sec-head{display:grid;gap:1rem;max-width:780px;margin-bottom:clamp(2.2rem,4vw,3.4rem)}
+.grid-bg{position:relative;isolation:isolate}
+.grid-bg::before{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;
+  background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+  background-size:48px 48px;
+  -webkit-mask-image:radial-gradient(ellipse 75% 70% at 70% 35%,#000 25%,transparent 75%);
+  mask-image:radial-gradient(ellipse 75% 70% at 70% 35%,#000 25%,transparent 75%)}
 
-/* ---------- reveal ---------- */
-.rv{opacity:0;transform:translateY(18px);transition:opacity .7s ease,transform .7s ease}
-.rv.in{opacity:1;transform:none}
-@media (prefers-reduced-motion:reduce){
-  .rv{opacity:1;transform:none;transition:none}
-  html{scroll-behavior:auto}
-  *{animation:none!important;transition:none!important}
-}
+/* ---------- reveal (content stays visible without JS) ---------- */
+.js .rv{opacity:0;transform:translateY(14px);transition:opacity .7s var(--ease),transform .7s var(--ease)}
+.js .rv.in{opacity:1;transform:none}
 
-/* ---------- nav ---------- */
-nav{
-  position:sticky;top:0;z-index:50;
-  background:rgba(11,29,45,.82);
-  backdrop-filter:blur(14px);
-  border-bottom:1px solid var(--line);
-}
-.nav-in{max-width:var(--maxw);margin:0 auto;padding:0 24px;height:68px;display:flex;align-items:center;justify-content:space-between;gap:1rem}
-.brand{display:flex;align-items:center;gap:.7rem}
-.brand-logo{height:38px;width:auto}
-.brand-logo--full{height:62px}
-.nav-links{display:flex;gap:2rem;align-items:center}
-.nav-links a{font-size:.92rem;color:var(--muted);transition:color .2s}
-.nav-links a:hover,.nav-links a:focus-visible{color:var(--paper)}
-.btn{
-  display:inline-flex;align-items:center;gap:.55rem;
-  font-family:'Archivo',sans-serif;font-weight:600;font-size:.95rem;
-  padding:.78rem 1.5rem;border-radius:999px;cursor:pointer;border:0;
-  transition:transform .2s,box-shadow .2s,background .2s;
-}
-.btn:focus-visible,a:focus-visible,.lang button:focus-visible{outline:2px solid var(--cyan);outline-offset:3px}
-.btn-primary{background:linear-gradient(120deg,var(--cyan),var(--teal));color:var(--ink)}
-.btn-primary:hover{transform:translateY(-1px);box-shadow:0 8px 30px rgba(50,199,221,.25)}
-.btn-ghost{background:transparent;color:var(--paper);border:1px solid rgba(140,163,181,.35)}
-.btn-ghost:hover{border-color:var(--cyan);color:var(--cyan)}
-.nav-cta{padding:.6rem 1.2rem;font-size:.88rem}
-.nav-login{font-size:.92rem;color:var(--paper)}
-.nav-links a.btn-primary,.nav-links a.btn-primary:hover{color:var(--ink)}
+/* ---------- buttons ---------- */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:.5rem;min-height:48px;padding:.75rem 1.4rem;border-radius:999px;font-weight:600;font-size:1rem;line-height:1.2;border:1px solid transparent;cursor:pointer;transition:background .2s,color .2s,border-color .2s}
+.btn-primary{background:var(--btn-bg);color:var(--btn-fg)}
+.btn-primary:hover{background:var(--btn-hover)}
+.btn-secondary{border-color:var(--line-2);color:var(--text);background:transparent}
+.btn-secondary:hover{border-color:var(--text)}
+.btn-sm{min-height:40px;padding:.5rem 1.05rem;font-size:.93rem}
+.btn .arr{transition:transform .2s}
+.btn:hover .arr{transform:translateX(3px)}
+.ctas{display:flex;flex-wrap:wrap;gap:.75rem}
 
-/* ---------- lang switcher ---------- */
-.lang{
-  display:flex;gap:2px;border:1px solid var(--line);border-radius:999px;
-  padding:3px;background:rgba(16,42,64,.6);
+/* ---------- header ---------- */
+.site-header{position:sticky;top:0;z-index:50;background:var(--header-bg);-webkit-backdrop-filter:saturate(1.4) blur(14px);backdrop-filter:saturate(1.4) blur(14px);border-bottom:1px solid transparent;transition:border-color .2s}
+.site-header.scrolled,.menu-open .site-header{border-bottom-color:var(--line)}
+.bar{height:var(--header-h);display:flex;align-items:center;gap:1.25rem}
+.brand{flex:none;display:flex;align-items:center;border-radius:6px}
+.brand img{height:34px;width:auto}
+.logo-dark{display:none!important}
+:root[data-theme="dark"] .logo-light{display:none!important}
+:root[data-theme="dark"] .logo-dark{display:block!important}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]) .logo-light{display:none!important}
+  :root:not([data-theme="light"]) .logo-dark{display:block!important}
 }
-.lang button{
-  font-family:'IBM Plex Mono',monospace;font-size:.66rem;letter-spacing:.08em;
-  background:transparent;border:0;color:var(--muted);cursor:pointer;
-  padding:.32rem .62rem;border-radius:999px;transition:background .2s,color .2s;
+.primary-nav{display:flex;gap:.15rem;margin-left:auto}
+.primary-nav a{font-size:.95rem;color:var(--text-2);padding:.45rem .75rem;border-radius:999px;transition:color .2s,background .2s}
+.primary-nav a:hover,.primary-nav a.is-active{color:var(--text);background:var(--tint)}
+.bar-actions{display:flex;align-items:center;gap:.55rem}
+.lang{display:flex;gap:2px;padding:3px;border:1px solid var(--line);border-radius:999px}
+.lang a{font-family:var(--f-mono);font-size:.75rem;letter-spacing:.06em;min-width:36px;height:30px;display:grid;place-items:center;border-radius:999px;color:var(--muted);transition:color .2s,background .2s}
+.lang a:hover{color:var(--text)}
+.lang a[aria-current]{background:var(--text);color:var(--bg)}
+.icon-btn{width:40px;height:40px;flex:none;display:grid;place-items:center;border-radius:999px;border:1px solid var(--line);background:transparent;cursor:pointer;color:var(--text-2);transition:color .2s,border-color .2s}
+.icon-btn:hover{color:var(--text);border-color:var(--line-2)}
+.icon-btn svg{width:18px;height:18px}
+.theme-toggle .i-sun{display:none}
+:root[data-theme="dark"] .theme-toggle .i-sun{display:block}
+:root[data-theme="dark"] .theme-toggle .i-moon{display:none}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]) .theme-toggle .i-sun{display:block}
+  :root:not([data-theme="light"]) .theme-toggle .i-moon{display:none}
 }
-.lang button:hover{color:var(--paper)}
-.lang button.active{background:linear-gradient(120deg,var(--cyan),var(--teal));color:var(--ink);font-weight:500}
+.login{font-size:.95rem;font-weight:500;padding:.45rem .5rem;border-radius:999px}
+.login:hover{color:var(--accent)}
+.menu-btn{display:none}
+.menu-btn .i-close,.menu-open .menu-btn .i-menu{display:none}
+.menu-open .menu-btn .i-close{display:block}
+.menu-panel{border-top:1px solid var(--line);background:var(--bg);padding:.5rem var(--gutter) 1.5rem;max-height:calc(100dvh - var(--header-h));overflow:auto}
+.menu-panel[hidden]{display:none}
+.menu-panel nav a{display:flex;align-items:center;justify-content:space-between;min-height:52px;font-size:1.1rem;font-weight:500;border-bottom:1px solid var(--line)}
+.menu-panel nav a::after{content:"→";color:var(--muted)}
+.menu-panel .row{display:flex;align-items:center;justify-content:space-between;gap:.75rem;margin-top:1.1rem;flex-wrap:wrap}
+.menu-panel .lang a{min-width:46px;height:40px}
+.menu-panel .ctas{margin-top:1.1rem}
+.menu-panel .ctas .btn{flex:1 1 auto}
 
 /* ---------- hero ---------- */
-.hero{border-top:0;padding:96px 0 110px;position:relative;overflow:hidden}
-.hero::after{
-  content:"";position:absolute;inset:auto -20% -55% -20%;height:70%;
-  background:radial-gradient(ellipse at center,rgba(41,157,168,.13),transparent 65%);
-  pointer-events:none;
-}
-.hero-grid{display:grid;grid-template-columns:1.05fr .95fr;gap:4.5rem;align-items:center;position:relative;z-index:1}
-.hero h1 .hl{background:linear-gradient(100deg,var(--cyan),var(--teal));-webkit-background-clip:text;background-clip:text;color:transparent}
-.hero .lead{margin:1.4rem 0 2.2rem}
-.hero-ctas{display:flex;gap:1rem;flex-wrap:wrap}
-.hero-note{margin-top:1.6rem;font-family:'IBM Plex Mono',monospace;font-size:.72rem;color:var(--muted);letter-spacing:.06em}
-.hero-note b{color:var(--teal);font-weight:500}
+.hero{padding:clamp(44px,7vw,96px) 0 clamp(40px,5vw,64px);overflow:hidden}
+.hero-grid{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr);gap:clamp(2.5rem,5vw,4.5rem);align-items:center}
+.hero h1{margin-top:1.1rem}
+.hero .lead{margin-top:1.4rem}
+.hero .ctas{margin-top:2rem}
+.engines{display:flex;flex-wrap:wrap;align-items:center;gap:.5rem .6rem;margin-top:1.8rem}
+.engines .label{color:var(--muted);margin-right:.2rem}
+.chip{display:inline-flex;align-items:center;gap:.5rem;padding:.4rem .85rem;border:1px solid var(--line);border-radius:999px;background:var(--surface);font-size:.92rem;font-weight:500;transition:border-color .2s}
+.chip:hover{border-color:var(--line-2)}
+.chip i{width:8px;height:8px;border-radius:50%;background:var(--fill)}
+.chip.second i{background:transparent;box-shadow:inset 0 0 0 2px var(--fill)}
 
-/* console card (signature) */
-.console{
-  background:linear-gradient(160deg,var(--panel),var(--panel-2));
-  border:1px solid var(--line);
-  border-radius:var(--radius);
-  box-shadow:0 30px 80px rgba(0,0,0,.45);
-  overflow:hidden;
-}
-.console-bar{display:flex;align-items:center;justify-content:space-between;padding:.85rem 1.2rem;border-bottom:1px solid var(--line)}
-.console-bar .t{font-family:'IBM Plex Mono',monospace;font-size:.68rem;letter-spacing:.14em;color:var(--muted);text-transform:uppercase}
-.live{display:flex;align-items:center;gap:.45rem;font-family:'IBM Plex Mono',monospace;font-size:.65rem;color:var(--cyan);letter-spacing:.1em}
-.live i{width:7px;height:7px;border-radius:50%;background:var(--cyan);animation:pulse 1.6s infinite}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:.25}}
-.console-q{padding:1.1rem 1.2rem .2rem;font-size:.92rem;color:var(--paper)}
-.console-q span{color:var(--muted)}
-
-/* triangulation: three independent estimates converge on one range */
-.tri{padding:.9rem 1.2rem 1.2rem}
-.tri-row{display:grid;grid-template-columns:10.5rem 1fr;gap:1rem;align-items:center;padding:.5rem 0}
-.tri-l{font-family:'IBM Plex Mono',monospace;font-size:.62rem;letter-spacing:.04em;color:var(--muted);line-height:1.35}
-.tri-l b{display:block;color:var(--paper);font-weight:500;font-size:.68rem;letter-spacing:.06em}
-.tri-track{position:relative;height:10px;border-radius:999px;background:rgba(140,163,181,.12)}
-.tri-bar{position:absolute;top:0;bottom:0;border-radius:999px;background:linear-gradient(90deg,var(--teal),rgba(50,199,221,.75));transform-origin:left center;transform:scaleX(0);transition:transform .9s cubic-bezier(.2,.7,.2,1)}
-.tri-row.final{margin-top:.35rem;padding-top:.9rem;border-top:1px dashed var(--line)}
-.tri-row.final .tri-l b{color:var(--cyan)}
-.tri-row.final .tri-track{background:rgba(50,199,221,.08)}
-.tri-row.final .tri-bar{background:var(--cyan);box-shadow:0 0 14px rgba(50,199,221,.55)}
-.tri-mark{position:absolute;top:-6px;bottom:-6px;width:2px;border-radius:2px;background:var(--paper);opacity:0;transition:opacity .4s}
-.tri-axis{display:grid;grid-template-columns:10.5rem 1fr;gap:1rem;margin-top:.35rem;font-family:'IBM Plex Mono',monospace;font-size:.58rem;letter-spacing:.06em;color:var(--muted)}
+/* instrument card: three independent estimates converge on one range */
+.instrument{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);box-shadow:var(--shadow);overflow:hidden}
+.ins-bar{display:flex;align-items:center;justify-content:space-between;gap:1rem;padding:.85rem 1.25rem;border-bottom:1px solid var(--line)}
+.ins-bar .label{color:var(--muted)}
+.status{display:inline-flex;align-items:center;gap:.45rem;font-family:var(--f-mono);font-size:.75rem;color:var(--accent);padding:.25rem .65rem;border-radius:999px;background:var(--tint);white-space:nowrap}
+.status i{width:7px;height:7px;border-radius:50%;background:var(--glow);animation:pulse 1.8s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.ins-q{display:flex;gap:.6rem;align-items:baseline;padding:1.05rem 1.25rem .2rem;font-weight:500}
+.ins-q .label{color:var(--muted)}
+.tri{padding:.6rem 1.25rem 1.1rem}
+.tri-row{display:grid;grid-template-columns:10.5rem 1fr;gap:1rem;align-items:center;padding:.42rem 0}
+.tri-l{font-size:.82rem;color:var(--muted);line-height:1.3}
+.tri-l b{display:block;color:var(--text);font-weight:600;font-size:.9rem}
+.tri-track{position:relative;height:10px;border-radius:999px;background:var(--surface-2);box-shadow:inset 0 0 0 1px var(--line)}
+.tri-bar{position:absolute;top:0;bottom:0;border-radius:999px;background:var(--fill);opacity:.6;transform-origin:left center;transition:transform 1s var(--ease)}
+.tri-row.final{margin-top:.35rem;padding-top:.85rem;border-top:1px dashed var(--line-2)}
+.tri-row.final .tri-l b{color:var(--accent)}
+.tri-row.final .tri-bar{background:var(--glow);opacity:1;box-shadow:0 0 0 4px var(--tint)}
+.tri-mark{position:absolute;top:-6px;bottom:-6px;width:2px;margin-left:-1px;border-radius:2px;background:var(--text);transition:opacity .4s}
+.tri-axis{display:grid;grid-template-columns:10.5rem 1fr;gap:1rem;margin-top:.45rem;font-family:var(--f-mono);font-size:.75rem;color:var(--muted)}
 .tri-axis .ticks{display:flex;justify-content:space-between}
-.tri.go .tri-bar{transform:scaleX(1)}
-.tri.go .tri-mark{opacity:1;transition-delay:2.5s}
-.console-stats{display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid var(--line)}
-.cstat{padding:1rem 1.2rem;border-right:1px solid var(--line)}
-.cstat:last-child{border-right:0}
-.cstat .v{font-family:'Archivo',sans-serif;font-weight:800;font-size:1.5rem;letter-spacing:-.02em;opacity:0;transform:translateY(6px);transition:opacity .6s,transform .6s}
-.cstat .v em{font-style:normal;color:var(--cyan)}
-.console.done .cstat .v{opacity:1;transform:none}
-.cstat .l{font-family:'IBM Plex Mono',monospace;font-size:.62rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-top:.15rem}
+.js .tri:not(.go) .tri-bar{transform:scaleX(0)}
+.js .tri:not(.go) .tri-mark{opacity:0}
+.tri.go .tri-mark{transition-delay:2.3s}
+.ins-stats{display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid var(--line)}
+.stat{padding:1rem 1.25rem;min-width:0}
+.stat+.stat{border-left:1px solid var(--line)}
+.stat-v{font-family:var(--f-display);font-size:1.8rem;font-weight:500;letter-spacing:-.01em;line-height:1.1;white-space:nowrap;transition:opacity .6s,transform .6s}
+.js .instrument:not(.done) .stat-v{opacity:0;transform:translateY(6px)}
+.stat .label{display:block;margin-top:.35rem;color:var(--muted);font-size:.75rem}
+.rating{display:inline-flex;gap:3px;vertical-align:middle}
+.rating b{display:grid;place-items:center;width:1.65em;height:1.85em;border-radius:5px;font-family:var(--f-mono);font-weight:500;font-size:.62em;background:var(--text);color:var(--bg)}
+.rating b+b{background:var(--accent);color:var(--bg)}
+.ins-foot{padding:.6rem 1.25rem;border-top:1px solid var(--line);font-family:var(--f-mono);font-size:.75rem;color:var(--muted)}
 
-/* ---------- problema ---------- */
-.split{display:grid;grid-template-columns:1fr 1fr;gap:4rem;align-items:start}
-.prose p{color:var(--muted);margin-bottom:1.1rem}
-.prose p b,.prose p strong{color:var(--paper);font-weight:600}
-.claimbox{
-  background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);
-  padding:1.6rem 1.8rem;margin-top:.4rem;
-}
-.claimbox .mono{font-size:.68rem;letter-spacing:.18em;text-transform:uppercase;color:var(--teal)}
-.claimbox p{font-family:'Archivo',sans-serif;font-weight:600;font-size:1.25rem;line-height:1.35;margin-top:.6rem;color:var(--paper)}
+/* proof strip */
+.proof{display:grid;grid-template-columns:repeat(3,1fr);margin-top:clamp(3rem,6vw,4.75rem);border-top:1px solid var(--line)}
+.proof li{padding:1.4rem 1.6rem 0 0}
+.proof li+li{padding-left:1.6rem;border-left:1px solid var(--line)}
+.proof .label{display:block;margin-bottom:.45rem}
+.proof p{color:var(--text-2);font-size:.98rem;max-width:36ch}
 
-/* ---------- servizi ---------- */
-.pillars{display:grid;grid-template-columns:1.15fr .85fr;gap:1.1rem;align-items:stretch}
-.pillar{background:var(--panel-2);border:1px solid var(--line);border-radius:var(--radius);padding:2.2rem}
-.pillar.main{background:linear-gradient(160deg,var(--panel),var(--panel-2));border-color:rgba(50,199,221,.35)}
-.pillar .mono{font-size:.68rem;letter-spacing:.18em;text-transform:uppercase;color:var(--teal)}
-.pillar h3{font-size:1.5rem;margin:.9rem 0 .7rem;line-height:1.25}
-.pillar p{color:var(--muted);font-size:.98rem}
-.pillar ul{list-style:none;margin-top:1.3rem;display:grid;gap:.6rem}
-.pillar li{position:relative;padding-left:1.4rem;font-size:.95rem;color:var(--paper)}
-.pillar li::before{content:"";position:absolute;left:0;top:.72em;width:.65rem;height:2px;background:var(--cyan)}
-.pillar:not(.main) li::before{background:var(--teal)}
+/* ---------- problem ---------- */
+.split{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:clamp(2rem,5vw,4.5rem);align-items:start;margin-bottom:clamp(2.5rem,5vw,3.5rem)}
+.split .sec-head{margin-bottom:0}
+.questions li{display:flex;gap:1rem;align-items:baseline;padding:.6rem 0;border-bottom:1px solid var(--line);font-family:var(--f-display);font-style:italic;font-size:clamp(1.22rem,1.9vw,1.45rem);line-height:1.3}
+.questions li::before{content:"?";flex:none;font-family:var(--f-mono);font-style:normal;font-size:.8rem;color:var(--accent);width:1.6rem;height:1.6rem;display:grid;place-items:center;border:1px solid var(--line-2);border-radius:50%;transform:translateY(-.15em)}
+.questions-k{display:block;margin-bottom:.6rem;color:var(--muted)}
+.questions-foot{margin-top:1.1rem;color:var(--text-2);font-weight:500}
+.compare{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem}
+.cmp{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:1.6rem}
+.cmp .label{color:var(--muted)}
+.cmp p{margin-top:.75rem;color:var(--text-2)}
+.cmp.us{background:var(--tint);border-color:var(--fill);box-shadow:inset 0 0 0 1px var(--fill)}
+.cmp.us .label{display:flex;align-items:center;gap:.5rem;color:var(--accent)}
+.cmp.us .label img{width:18px;height:auto}
+.cmp.us p{color:var(--text)}
 
-/* ---------- metodo ---------- */
-.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:1.1rem}
-.step{
-  background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);
-  padding:1.6rem 1.4rem;position:relative;
-}
-.step .n{font-family:'IBM Plex Mono',monospace;font-size:.7rem;color:var(--teal);letter-spacing:.16em}
-.step h3{margin:.8rem 0 .55rem}
-.step p{font-size:.92rem;color:var(--muted)}
-.step::after{
-  content:"→";position:absolute;right:-17px;top:50%;transform:translateY(-50%);
-  color:var(--teal);font-size:1.1rem;z-index:2;
-}
-.step:last-child::after{display:none}
+/* ---------- method ---------- */
+.quote{border-left:3px solid var(--fill);padding:.3rem 0 .3rem 1.4rem;align-self:end}
+.quote .label{color:var(--muted)}
+.quote p{font-family:var(--f-display);font-size:clamp(1.35rem,2.2vw,1.75rem);line-height:1.3;letter-spacing:-.01em;margin-top:.6rem}
+.steps{position:relative;display:grid;grid-template-columns:repeat(4,1fr);gap:1.25rem}
+.steps::before{content:"";position:absolute;top:1.1rem;left:1.1rem;right:1.1rem;height:1px;background:linear-gradient(90deg,var(--fill),var(--line-2))}
+.step{position:relative;padding-top:3rem}
+.node{position:absolute;top:0;left:0;width:2.2rem;height:2.2rem;border-radius:50%;border:1px solid var(--line-2);background:var(--bg);display:grid;place-items:center;font-family:var(--f-mono);font-size:.78rem;color:var(--accent)}
+.alt .node{background:var(--bg-alt)}
+.step:first-child .node{border-color:var(--fill);background:var(--fill);color:var(--navy)}
+.step .label{color:var(--muted)}
+.step h3{margin:.45rem 0 .5rem}
+.step p{color:var(--text-2);font-size:.97rem}
 
-/* ---------- affidabilita ---------- */
-.rel-card{
-  background:linear-gradient(160deg,var(--panel),var(--panel-2));
-  border:1px solid var(--line);border-radius:var(--radius);
-  padding:2.2rem;display:grid;grid-template-columns:1.2fr .8fr;gap:2.5rem;align-items:center;
-}
-.chain{list-style:none;display:grid;gap:.75rem}
-.chain li{
-  display:grid;grid-template-columns:6.2rem 1fr;gap:1rem;align-items:center;position:relative;
-  padding:.8rem 1rem;border:1px solid var(--line);border-radius:10px;background:rgba(11,29,45,.55);
-}
-.chain li+li::before{content:"";position:absolute;left:3rem;top:calc(-.75rem - 1px);height:.75rem;border-left:1px dashed var(--teal)}
-.chain .k{font-family:'IBM Plex Mono',monospace;font-size:.62rem;letter-spacing:.16em;text-transform:uppercase;color:var(--teal)}
-.chain .t{font-size:.92rem;color:var(--paper);line-height:1.35}
-.chain .t span{display:block;color:var(--muted);font-size:.8rem}
-.chain li:first-child{border-color:rgba(50,199,221,.4)}
-.score .v{font-family:'Archivo',sans-serif;font-weight:800;font-size:clamp(3.4rem,6vw,5rem);letter-spacing:-.01em;line-height:1;background:linear-gradient(100deg,var(--cyan),var(--teal));-webkit-background-clip:text;background-clip:text;color:transparent}
-.score .l{font-family:'IBM Plex Mono',monospace;font-size:.68rem;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);margin-top:.6rem}
-.score p{color:var(--muted);font-size:.95rem;margin-top:1.2rem;max-width:34ch}
-.threshold{
-  margin-top:1.4rem;padding:.8rem 1rem;border-left:2px solid var(--cyan);
-  background:rgba(50,199,221,.06);font-size:.78rem;color:var(--paper);border-radius:0 8px 8px 0;
-  font-family:'IBM Plex Mono',monospace;
-}
+/* ---------- reliability band (always dark) ---------- */
+.band{background:var(--band-bg);color:#F2F5F7;
+  --text:#F2F5F7;--text-2:#C3D1DB;--muted:#9DB2C2;--line:rgba(140,163,181,.22);--line-2:rgba(140,163,181,.38);
+  --surface:#102A40;--surface-2:#0E2436;--accent:#32C7DD;--tint:rgba(50,199,221,.09);--grid:rgba(140,163,181,.07)}
+.section.band+.section,.section+.section.band{border-top-color:transparent}
+.rel-grid{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr);gap:clamp(1.5rem,4vw,3rem);align-items:start}
+.ledger{position:relative;display:grid;gap:.6rem}
+.ledger::before{content:"";position:absolute;left:1.15rem;top:1.6rem;bottom:1.6rem;border-left:1px dashed var(--line-2)}
+.ledger li{position:relative;display:grid;grid-template-columns:7.2rem 1fr;gap:1rem;align-items:center;padding:.85rem 1.1rem .85rem 2.6rem;background:var(--surface-2);border:1px solid var(--line);border-radius:var(--r-sm)}
+.ledger li::before{content:"";position:absolute;left:calc(1.15rem - 5px);top:50%;width:11px;height:11px;margin-top:-5.5px;border-radius:50%;background:var(--surface-2);border:2px solid var(--fill)}
+.ledger li:first-child{border-color:rgba(50,199,221,.55);background:var(--surface)}
+.ledger li:first-child::before{background:var(--glow);border-color:var(--glow)}
+.ledger .k{font-family:var(--f-mono);font-size:.75rem;letter-spacing:.08em;text-transform:uppercase;color:var(--accent)}
+.ledger .t{font-size:.98rem;line-height:1.35}
+.ledger .t span{display:block;color:var(--muted);font-size:.86rem}
+.grade{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:clamp(1.3rem,2.5vw,1.8rem)}
+.grade .label{color:var(--muted)}
+.tiles{display:grid;grid-template-columns:1fr 1fr;gap:.6rem;margin:1rem 0 1.2rem}
+.tile{border:1px solid var(--line);border-radius:var(--r-sm);padding:.9rem;background:var(--surface-2)}
+.tile b{display:block;font-family:var(--f-display);font-weight:500;font-size:3.4rem;line-height:1;color:var(--accent)}
+.tile>span{display:block;margin-top:.35rem;font-size:.86rem;color:var(--text-2);line-height:1.35;min-height:2.3em}
+.scale{display:grid;grid-template-columns:repeat(5,1fr);gap:3px;margin-top:.7rem}
+.scale i{height:1.6rem;border-radius:4px;display:grid;place-items:center;font-style:normal;font-family:var(--f-mono);font-size:.75rem;color:var(--muted);border:1px solid var(--line)}
+.scale i.on{background:var(--glow);border-color:var(--glow);color:var(--navy);font-weight:500}
+.grade p{color:var(--text-2);font-size:.95rem}
+.threshold{margin-top:1.1rem;padding:.8rem 1rem;border-left:2px solid var(--glow);background:var(--tint);border-radius:0 var(--r-sm) var(--r-sm) 0;font-family:var(--f-mono);font-size:.8rem;line-height:1.5;color:var(--text)}
 
-/* ---------- vision/mission ---------- */
-.vm{display:grid;grid-template-columns:1fr 1fr;gap:1.1rem}
-.vm-card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:2.2rem}
-.vm-card .mono{font-size:.68rem;letter-spacing:.18em;text-transform:uppercase;color:var(--teal)}
-.vm-card h3{font-size:1.5rem;margin:.9rem 0 .7rem;line-height:1.25}
-.vm-card p{color:var(--muted);font-size:.98rem}
+/* ---------- services ---------- */
+.engines-grid{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,.8fr);gap:1rem}
+.engine{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);padding:clamp(1.5rem,3vw,2.4rem)}
+.engine.primary{box-shadow:inset 0 3px 0 var(--fill),var(--shadow)}
+.engine h3{font-family:var(--f-display);font-weight:500;font-size:clamp(1.65rem,2.5vw,2.1rem);letter-spacing:-.015em;line-height:1.15;margin:.7rem 0 .6rem}
+.engine>p{color:var(--text-2)}
+.checklist{display:grid;gap:.65rem;margin-top:1.4rem;padding-top:1.3rem;border-top:1px solid var(--line)}
+.checklist li{position:relative;padding-left:1.6rem}
+.checklist li::before{content:"";position:absolute;left:0;top:.72em;width:.85rem;height:2px;border-radius:2px;background:var(--fill)}
+.format{display:grid;grid-template-columns:auto 1fr;gap:.5rem 1.5rem;align-items:baseline;margin-top:1rem;padding:1.2rem 1.6rem;border:1px dashed var(--line-2);border-radius:var(--r)}
+.format p{color:var(--text-2)}
 
-.values{display:grid;grid-template-columns:repeat(2,1fr);gap:1.1rem;margin-top:1.1rem}
-.value{border:1px solid var(--line);border-radius:var(--radius);padding:1.7rem 1.6rem;background:var(--panel-2)}
-.value h3{display:flex;align-items:baseline;gap:.7rem}
-.value h3 .k{font-family:'IBM Plex Mono',monospace;font-size:.68rem;color:var(--teal);letter-spacing:.12em;font-weight:500}
-.value p{font-size:.92rem;color:var(--muted);margin-top:.5rem}
+/* ---------- audiences ---------- */
+.for{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr);gap:clamp(2rem,5vw,4.5rem);align-items:center}
+.for h2{font-size:clamp(1.8rem,3vw,2.5rem);margin-top:1rem}
+.for .lead{margin-top:1rem}
+.audiences{display:flex;flex-wrap:wrap;gap:.55rem}
+.audiences li{padding:.6rem 1.05rem;border:1px solid var(--line-2);border-radius:999px;background:var(--surface);font-weight:500}
+.for .ctas{margin-top:1.6rem}
+
+/* ---------- vision ---------- */
+.vm{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:clamp(2rem,5vw,4.5rem)}
+.statement+.statement{margin-top:2.2rem;padding-top:2.2rem;border-top:1px solid var(--line)}
+.statement h3{font-family:var(--f-display);font-weight:500;font-size:clamp(1.5rem,2.4vw,1.95rem);line-height:1.2;letter-spacing:-.015em;margin:.6rem 0 .7rem}
+.statement p{color:var(--text-2)}
+.principles-k{display:block;margin-bottom:.4rem}
+.principles{border-top:1px solid var(--line)}
+.principles li{display:grid;grid-template-columns:2.6rem 1fr;gap:.35rem 1rem;padding:1.15rem 0;border-bottom:1px solid var(--line)}
+.principles .n{font-family:var(--f-mono);font-size:.8rem;color:var(--accent);padding-top:.15rem}
+.principles h3{font-size:1.08rem}
+.principles p{grid-column:2;color:var(--text-2);font-size:.97rem}
 
 /* ---------- team ---------- */
-.team{display:grid;grid-template-columns:repeat(4,1fr);gap:1.1rem}
-.member{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:1.7rem 1.5rem;transition:border-color .25s,transform .25s}
-.member:hover{border-color:rgba(50,199,221,.4);transform:translateY(-3px)}
-.avatar{
-  width:52px;height:52px;border-radius:12px;margin-bottom:1.1rem;
-  background:linear-gradient(135deg,var(--teal),var(--panel));
-  display:flex;align-items:center;justify-content:center;
-  font-family:'Archivo',sans-serif;font-weight:800;color:var(--ink);font-size:1.05rem;letter-spacing:-.02em;
-}
-.member h3{font-size:1.02rem}
-.member .role{font-family:'IBM Plex Mono',monospace;font-size:.62rem;letter-spacing:.14em;text-transform:uppercase;color:var(--cyan);margin:.3rem 0 .7rem}
-.member p{font-size:.86rem;color:var(--muted)}
+.team{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem}
+.member{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:1.5rem}
+.member-top{display:flex;gap:.9rem;align-items:center;margin-bottom:.8rem}
+@media (min-width:1101px){.member-top{flex-direction:column;align-items:flex-start}}
+.avatar{flex:none;width:48px;height:48px;border-radius:50%;display:grid;place-items:center;font-family:var(--f-display);font-size:1.15rem;background:var(--tint);color:var(--accent);border:1px solid var(--line)}
+.member h3{font-size:1.03rem}
+.role{font-family:var(--f-mono);font-size:.75rem;letter-spacing:.03em;color:var(--accent);line-height:1.35;margin-top:.15rem}
+.member p{font-size:.93rem;color:var(--text-2)}
 
-/* ---------- positioning strip ---------- */
-.strip{
-  border:1px solid var(--line);border-radius:var(--radius);
-  background:linear-gradient(120deg,rgba(41,157,168,.1),rgba(16,42,64,.6));
-  padding:2.4rem 2.6rem;display:grid;grid-template-columns:1fr auto;gap:2rem;align-items:center;
-}
-.strip h3{font-size:1.45rem;max-width:30ch}
-.strip p{color:var(--muted);margin-top:.5rem;max-width:56ch;font-size:.96rem}
+/* ---------- faq ---------- */
+.faq{display:grid;grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr);gap:clamp(2rem,5vw,4.5rem);align-items:start}
+.faq .sec-head{margin-bottom:0}
+.faq details{border-bottom:1px solid var(--line)}
+.faq details:first-child{border-top:1px solid var(--line)}
+.faq summary{list-style:none;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:1rem;padding:1.15rem 0;font-weight:600;font-size:1.06rem;line-height:1.4;border-radius:6px}
+.faq summary::-webkit-details-marker{display:none}
+.faq summary::after{content:"+";flex:none;width:1.8rem;height:1.8rem;display:grid;place-items:center;border:1px solid var(--line-2);border-radius:50%;font-family:var(--f-mono);font-weight:400;color:var(--accent);transition:transform .2s}
+.faq details[open] summary::after{transform:rotate(45deg)}
+.faq details p{padding:0 2.8rem 1.25rem 0;color:var(--text-2)}
+
+/* ---------- contact ---------- */
+.contact{text-align:center;background:var(--bg-alt)}
+.contact .grid-bg::before{-webkit-mask-image:radial-gradient(ellipse 60% 80% at 50% 50%,#000 20%,transparent 75%);mask-image:radial-gradient(ellipse 60% 80% at 50% 50%,#000 20%,transparent 75%)}
+.contact h2{max-width:18ch;margin:1.1rem auto 1rem}
+.contact .lead{margin:0 auto 2rem}
+.contact .ctas{justify-content:center}
+.mail{margin-top:1.5rem;color:var(--muted);font-size:.95rem}
+.mail a{color:var(--accent);font-weight:600;text-decoration:underline;text-underline-offset:3px}
 
 /* ---------- footer ---------- */
-footer{border-top:1px solid var(--line);padding:64px 0 40px}
-.f-grid{display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:3rem;margin-bottom:3rem}
-.f-grid p{color:var(--muted);font-size:.9rem;max-width:38ch;margin-top:.9rem}
-.f-col h4{font-family:'IBM Plex Mono',monospace;font-size:.66rem;letter-spacing:.18em;text-transform:uppercase;color:var(--teal);margin-bottom:1rem;font-weight:500}
-.f-col a{display:block;color:var(--muted);font-size:.92rem;padding:.28rem 0;transition:color .2s}
-.f-col a:hover{color:var(--paper)}
-.f-bottom{border-top:1px solid var(--line);padding-top:1.6rem;display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap;font-family:'IBM Plex Mono',monospace;font-size:.68rem;color:var(--muted);letter-spacing:.08em}
+.site-footer{border-top:1px solid var(--line);padding:clamp(48px,6vw,72px) 0 32px}
+.f-grid{display:grid;grid-template-columns:1.6fr 1fr 1fr 1fr;gap:2.5rem}
+.f-brand img{height:58px;width:auto}
+.f-grid>div>p{color:var(--muted);font-size:.93rem;max-width:36ch;margin-top:1rem}
+.f-h{font-family:var(--f-mono);font-size:.75rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:.7rem}
+.f-col a{display:block;width:fit-content;padding:.32rem 0;color:var(--text-2);transition:color .2s}
+.f-col a:hover{color:var(--accent)}
+.f-col .lang{width:fit-content;margin-top:.3rem}
+.f-col .lang a{display:grid;width:auto;padding:0}
+.f-bottom{display:flex;justify-content:space-between;flex-wrap:wrap;gap:1rem;margin-top:3rem;padding-top:1.4rem;border-top:1px solid var(--line);font-family:var(--f-mono);font-size:.75rem;color:var(--muted)}
 
 /* ---------- responsive ---------- */
-@media(max-width:960px){
-  .hero-grid,.split,.rel-card,.pillars{grid-template-columns:1fr;gap:2.6rem}
-  .steps{grid-template-columns:1fr 1fr}
-  .step::after{display:none}
+@media (max-width:1100px){
   .team{grid-template-columns:1fr 1fr}
-  .strip{grid-template-columns:1fr}
-  .f-grid{grid-template-columns:1fr}
-  .nav-links a:not(.btn){display:none}
-  section{padding:78px 0}
+  .primary-nav,.bar-actions .lang,.bar-actions .login{display:none}
+  .bar-actions{margin-left:auto}
+  .menu-btn{display:grid}
 }
-@media(max-width:560px){
-  .steps,.team,.vm,.values{grid-template-columns:1fr}
-  .tri-row,.tri-axis{grid-template-columns:1fr;gap:.4rem}
-  .tri-axis>span:first-child{display:none}
-  .chain li{grid-template-columns:1fr;gap:.2rem}
-  .chain li+li::before{left:1.4rem}
-  .rel-card,.pillar{padding:1.6rem}
-  .console-stats{grid-template-columns:1fr 1fr 1fr}
-  .cstat{padding:.85rem .8rem}
-  .cstat .v{font-size:1.15rem}
-  .nav-cta{display:none}
+@media (min-width:1101px){.menu-panel{display:none!important}}
+@media (max-width:900px){
+  .hero-grid,.split,.rel-grid,.engines-grid,.for,.vm,.faq{grid-template-columns:1fr}
+  .compare{grid-template-columns:1fr}
+  .steps{grid-template-columns:1fr 1fr;row-gap:2.2rem}
+  .steps::before{display:none}
+  .team{grid-template-columns:1fr 1fr}
+  .f-grid{grid-template-columns:1fr 1fr}
+  .f-grid>div:first-child{grid-column:1/-1}
+  .quote{align-self:start}
+}
+@media (max-width:600px){
+  body{font-size:16px}
+  .bar-actions .btn-sm{display:none}
+  .proof{grid-template-columns:1fr}
+  .proof li,.proof li+li{padding:1.1rem 0;border-left:0}
+  .proof li+li{border-top:1px solid var(--line)}
+  .steps{grid-template-columns:1fr;row-gap:1.6rem}
+  .steps::before{display:block;top:1.1rem;bottom:1.1rem;left:1.1rem;right:auto;width:1px;height:auto;background:linear-gradient(180deg,var(--fill),var(--line-2))}
+  .step{padding:0 0 0 3.4rem}
+  .team{grid-template-columns:1fr}
+  .tri-row,.tri-axis{grid-template-columns:1fr;gap:.35rem}
+  .tri-axis>span:first-child{order:2}
+  .ledger li{grid-template-columns:1fr;gap:.15rem}
+  .format{grid-template-columns:1fr}
+  .f-grid{grid-template-columns:1fr}
+  .hero .ctas .btn{flex:1 1 auto}
+  .stat{padding:.85rem .8rem}
+  .stat-v{font-size:1.35rem}
+  .ins-bar{padding:.75rem 1rem}
+  .ins-q,.tri,.ins-foot{padding-left:1rem;padding-right:1rem}
+  .faq details p{padding-right:0}
+}
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  .js .rv{opacity:1;transform:none}
+  *,*::before,*::after{animation:none!important;transition:none!important}
 }
 </style>
 </head>
 <body>
+<a class="skip" href="#main" data-i18n="n_skip"></a>
 
-<!-- ============ NAV ============ -->
-<nav>
-  <div class="nav-in">
-    <a class="brand" href="#top" aria-label="Perceptra — home">
-      <img class="brand-logo" src="/brand/perceptra-wordmark-on-dark.svg" alt="Perceptra" width="148" height="38">
+<!-- ============ HEADER ============ -->
+<header class="site-header">
+  <div class="wrap bar">
+    <a class="brand" href="#top">
+      <img class="logo-light" src="/brand/perceptra-wordmark-on-light.svg" alt="Perceptra" width="132" height="34">
+      <img class="logo-dark" src="/brand/perceptra-wordmark-on-dark.svg" alt="Perceptra" width="132" height="34">
     </a>
-    <div class="nav-links">
-      <a href="#servizi" data-i18n="n_servizi"></a>
+    <nav class="primary-nav" data-i18n-aria="n_nav">
       <a href="#metodo" data-i18n="n_metodo"></a>
       <a href="#affidabilita" data-i18n="n_aff"></a>
+      <a href="#servizi" data-i18n="n_servizi"></a>
       <a href="#chi-siamo" data-i18n="n_chi"></a>
-      <div class="lang" role="group" aria-label="Language">
-        <button data-lang="it">IT</button>
-        <button data-lang="en">EN</button>
-        <button data-lang="fr">FR</button>
+      <a href="#faq" data-i18n="n_faq"></a>
+    </nav>
+    <div class="bar-actions">
+      <div class="lang" role="group" data-i18n-aria="n_lang">
+        <a href="/" hreflang="it" lang="it" data-lang="it">IT</a>
+        <a href="/en" hreflang="en" lang="en" data-lang="en">EN</a>
+        <a href="/fr" hreflang="fr" lang="fr" data-lang="fr">FR</a>
       </div>
-      <a href="https://app.perceptra.eu/login" class="nav-login" data-app="login" data-utm="nav" data-i18n="n_login"></a>
-      <a href="https://app.perceptra.eu/signup" class="btn btn-primary nav-cta" data-app="signup" data-utm="nav" data-i18n="n_signup"></a>
+      <button class="icon-btn theme-toggle" type="button" data-theme-toggle data-i18n-aria="n_theme" aria-pressed="false">
+        <svg class="i-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.5 14.2A8.5 8.5 0 0 1 9.8 3.5a8.5 8.5 0 1 0 10.7 10.7z"/></svg>
+        <svg class="i-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.2M12 19.3v2.2M4.6 4.6l1.6 1.6M17.8 17.8l1.6 1.6M2.5 12h2.2M19.3 12h2.2M4.6 19.4l1.6-1.6M17.8 6.2l1.6-1.6"/></svg>
+      </button>
+      <a class="login" href="https://app.perceptra.eu/login" data-app="login" data-utm="nav" data-i18n="n_login"></a>
+      <a class="btn btn-primary btn-sm" href="#contatti" data-i18n="n_contact"></a>
+      <button class="icon-btn menu-btn" type="button" aria-expanded="false" aria-controls="menu" data-i18n-aria="n_menu">
+        <svg class="i-menu" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+        <svg class="i-close" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
     </div>
   </div>
-</nav>
-
-<!-- ============ HERO ============ -->
-<header class="hero" id="top">
-  <div class="wrap hero-grid">
-    <div>
-      <div class="eyebrow" data-i18n="h_eyebrow"></div>
-      <h1 style="margin-top:1.2rem" data-i18n="h_title"></h1>
-      <p class="lead" data-i18n="h_lead"></p>
-      <div class="hero-ctas">
-        <a href="https://app.perceptra.eu/signup" class="btn btn-primary" data-app="signup" data-utm="hero" data-i18n="h_cta1"></a>
-        <a href="#metodo" class="btn btn-ghost" data-i18n="h_cta2"></a>
+  <div class="menu-panel" id="menu" hidden>
+    <nav data-i18n-aria="n_nav">
+      <a href="#metodo" data-i18n="n_metodo"></a>
+      <a href="#affidabilita" data-i18n="n_aff"></a>
+      <a href="#servizi" data-i18n="n_servizi"></a>
+      <a href="#chi-siamo" data-i18n="n_chi"></a>
+      <a href="#faq" data-i18n="n_faq"></a>
+    </nav>
+    <div class="row">
+      <div class="lang" role="group" data-i18n-aria="n_lang">
+        <a href="/" hreflang="it" lang="it" data-lang="it">IT</a>
+        <a href="/en" hreflang="en" lang="en" data-lang="en">EN</a>
+        <a href="/fr" hreflang="fr" lang="fr" data-lang="fr">FR</a>
       </div>
-      <p class="hero-note" data-i18n="h_note"></p>
     </div>
-
-    <!-- signature: triangulation console (illustrative example) -->
-    <div class="console" id="console">
-      <div class="console-bar">
-        <span class="t" data-i18n="c_title"></span>
-        <span class="live"><i></i><span data-i18n="c_live"></span></span>
-      </div>
-      <div class="console-q" data-i18n="c_q"></div>
-      <div class="tri" id="tri" aria-hidden="true">
-        <div class="tri-row"><span class="tri-l" data-i18n="c_m1"></span><div class="tri-track"><i class="tri-bar" style="left:40.0%;width:35.0%;transition-delay:0.2s"></i></div></div>
-        <div class="tri-row"><span class="tri-l" data-i18n="c_m2"></span><div class="tri-track"><i class="tri-bar" style="left:32.5%;width:32.5%;transition-delay:0.6s"></i></div></div>
-        <div class="tri-row"><span class="tri-l" data-i18n="c_m3"></span><div class="tri-track"><i class="tri-bar" style="left:47.5%;width:37.5%;transition-delay:1s"></i></div></div>
-        <div class="tri-row final"><span class="tri-l" data-i18n="c_m4"></span><div class="tri-track"><i class="tri-bar" style="left:47.5%;width:17.5%;transition-delay:1.7s"></i><i class="tri-mark" style="left:56.0%"></i></div></div>
-        <div class="tri-axis"><span data-i18n="c_axis"></span><div class="ticks"><span>300</span><span>400</span><span>500</span></div></div>
-      </div>
-      <div class="console-stats">
-        <div class="cstat"><div class="v" data-i18n="c_v1"></div><div class="l" data-i18n="c_val"></div></div>
-        <div class="cstat"><div class="v" data-i18n="c_v2"></div><div class="l" data-i18n="c_rng"></div></div>
-        <div class="cstat"><div class="v"><em>AB</em></div><div class="l" data-i18n="c_rat"></div></div>
-      </div>
+    <div class="ctas">
+      <a class="btn btn-secondary" href="https://app.perceptra.eu/login" data-app="login" data-utm="menu" data-i18n="n_login"></a>
+      <a class="btn btn-primary" href="#contatti" data-i18n="n_contact"></a>
     </div>
   </div>
 </header>
 
-<!-- ============ IL PROBLEMA ============ -->
-<section id="problema">
+<main id="main">
+
+<!-- ============ HERO ============ -->
+<section class="hero grid-bg" id="top">
   <div class="wrap">
-    <div class="sec-head rv">
-      <div class="eyebrow" data-i18n="p_eyebrow"></div>
-      <h2 data-i18n="p_title"></h2>
+    <div class="hero-grid">
+      <div>
+        <p class="label eyebrow" data-i18n="h_eyebrow"></p>
+        <h1 data-i18n="h_title"></h1>
+        <p class="lead" data-i18n="h_lead"></p>
+        <div class="ctas">
+          <a class="btn btn-primary" href="#contatti"><span data-i18n="h_cta1"></span><span class="arr" aria-hidden="true">→</span></a>
+          <a class="btn btn-secondary" href="#metodo" data-i18n="h_cta2"></a>
+        </div>
+        <div class="engines">
+          <span class="label" data-i18n="h_engines"></span>
+          <a class="chip" href="#servizi"><i aria-hidden="true"></i><span data-i18n="e1"></span></a>
+          <a class="chip second" href="#servizi"><i aria-hidden="true"></i><span data-i18n="e2"></span></a>
+        </div>
+      </div>
+
+      <!-- signature: triangulation instrument (illustrative example) -->
+      <figure class="instrument" id="instrument">
+        <div class="ins-bar">
+          <span class="label" data-i18n="c_title"></span>
+          <span class="status"><i aria-hidden="true"></i><span data-i18n="c_live"></span></span>
+        </div>
+        <div class="ins-q"><span class="label" aria-hidden="true">Q</span><span data-i18n="c_q"></span></div>
+        <div class="tri" id="tri" aria-hidden="true">
+          <div class="tri-row"><span class="tri-l" data-i18n="c_m1"></span><div class="tri-track"><i class="tri-bar" style="left:40%;width:35%;transition-delay:.2s"></i></div></div>
+          <div class="tri-row"><span class="tri-l" data-i18n="c_m2"></span><div class="tri-track"><i class="tri-bar" style="left:32.5%;width:32.5%;transition-delay:.6s"></i></div></div>
+          <div class="tri-row"><span class="tri-l" data-i18n="c_m3"></span><div class="tri-track"><i class="tri-bar" style="left:47.5%;width:37.5%;transition-delay:1s"></i></div></div>
+          <div class="tri-row final"><span class="tri-l" data-i18n="c_m4"></span><div class="tri-track"><i class="tri-bar" style="left:47.5%;width:17.5%;transition-delay:1.6s"></i><i class="tri-mark" style="left:56%"></i></div></div>
+          <div class="tri-axis"><span data-i18n="c_axis"></span><div class="ticks"><span>300</span><span>400</span><span>500</span></div></div>
+        </div>
+        <div class="ins-stats" aria-hidden="true">
+          <div class="stat"><div class="stat-v" data-i18n="c_v1"></div><span class="label" data-i18n="c_val"></span></div>
+          <div class="stat"><div class="stat-v" data-i18n="c_v2"></div><span class="label" data-i18n="c_rng"></span></div>
+          <div class="stat"><div class="stat-v"><span class="rating"><b>A</b><b>B</b></span></div><span class="label" data-i18n="c_rat"></span></div>
+        </div>
+        <figcaption class="ins-foot"><span data-i18n="c_note"></span><span class="sr-only" data-i18n="c_sum"></span></figcaption>
+      </figure>
     </div>
+
+    <ul class="proof rv">
+      <li><span class="label" data-i18n="pf1_k"></span><p data-i18n="pf1_t"></p></li>
+      <li><span class="label" data-i18n="pf2_k"></span><p data-i18n="pf2_t"></p></li>
+      <li><span class="label" data-i18n="pf3_k"></span><p data-i18n="pf3_t"></p></li>
+    </ul>
+  </div>
+</section>
+
+<!-- ============ PROBLEM ============ -->
+<section class="section" id="problema">
+  <div class="wrap">
     <div class="split">
-      <div class="prose rv">
-        <p data-i18n="p_p1"></p>
-        <p data-i18n="p_p2"></p>
-        <p data-i18n="p_p3"></p>
+      <div class="sec-head rv">
+        <p class="label eyebrow" data-i18n="p_eyebrow"></p>
+        <h2 data-i18n="p_title"></h2>
       </div>
       <div class="rv">
-        <div class="claimbox">
-          <span class="mono" data-i18n="p_c1_k"></span>
-          <p data-i18n="p_c1_t"></p>
-        </div>
-        <div class="claimbox" style="margin-top:1.1rem">
-          <span class="mono" data-i18n="p_c2_k"></span>
-          <p data-i18n="p_c2_t"></p>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ============ SERVIZI ============ -->
-<section id="servizi">
-  <div class="wrap">
-    <div class="sec-head rv">
-      <div class="eyebrow" data-i18n="sv_eyebrow"></div>
-      <h2 data-i18n="sv_title"></h2>
-      <p class="lead" data-i18n="sv_lead"></p>
-    </div>
-    <div class="pillars rv">
-      <div class="pillar main">
-        <span class="mono" data-i18n="sv1_k"></span>
-        <h3 data-i18n="sv1_t"></h3>
-        <p data-i18n="sv1_p"></p>
-        <ul>
-          <li data-i18n="sv1_l1"></li>
-          <li data-i18n="sv1_l2"></li>
-          <li data-i18n="sv1_l3"></li>
-          <li data-i18n="sv1_l4"></li>
-          <li data-i18n="sv1_l5"></li>
+        <span class="label questions-k" data-i18n="p_q_k"></span>
+        <ul class="questions">
+          <li data-i18n="q1"></li>
+          <li data-i18n="q2"></li>
+          <li data-i18n="q3"></li>
+          <li data-i18n="q4"></li>
         </ul>
+        <p class="questions-foot" data-i18n="p_lead"></p>
       </div>
-      <div class="pillar">
-        <span class="mono" data-i18n="sv2_k"></span>
-        <h3 data-i18n="sv2_t"></h3>
-        <p data-i18n="sv2_p"></p>
-        <ul>
-          <li data-i18n="sv2_l1"></li>
-          <li data-i18n="sv2_l2"></li>
-          <li data-i18n="sv2_l3"></li>
-        </ul>
-      </div>
+    </div>
+    <div class="compare rv">
+      <div class="cmp"><span class="label" data-i18n="cmp1_k"></span><p data-i18n="cmp1_t"></p></div>
+      <div class="cmp"><span class="label" data-i18n="cmp2_k"></span><p data-i18n="cmp2_t"></p></div>
+      <div class="cmp us"><span class="label"><img src="/brand/perceptra-symbol.svg" alt="" width="18" height="20">Perceptra</span><p data-i18n="cmp3_t"></p></div>
     </div>
   </div>
 </section>
 
-<!-- ============ METODO ============ -->
-<section id="metodo">
+<!-- ============ METHOD ============ -->
+<section class="section alt" id="metodo">
   <div class="wrap">
-    <div class="sec-head rv">
-      <div class="eyebrow" data-i18n="m_eyebrow"></div>
-      <h2 data-i18n="m_title"></h2>
-      <p class="lead" data-i18n="m_lead"></p>
+    <div class="split">
+      <div class="sec-head rv">
+        <p class="label eyebrow" data-i18n="m_eyebrow"></p>
+        <h2 data-i18n="m_title"></h2>
+        <p class="lead" data-i18n="m_lead"></p>
+      </div>
+      <blockquote class="quote rv">
+        <span class="label" data-i18n="m_q_k"></span>
+        <p data-i18n="m_q"></p>
+      </blockquote>
     </div>
-    <div class="steps rv">
-      <div class="step">
-        <span class="n" data-i18n="s1n"></span>
-        <h3 data-i18n="s1t"></h3>
-        <p data-i18n="s1p"></p>
-      </div>
-      <div class="step">
-        <span class="n" data-i18n="s2n"></span>
-        <h3 data-i18n="s2t"></h3>
-        <p data-i18n="s2p"></p>
-      </div>
-      <div class="step">
-        <span class="n" data-i18n="s3n"></span>
-        <h3 data-i18n="s3t"></h3>
-        <p data-i18n="s3p"></p>
-      </div>
-      <div class="step">
-        <span class="n" data-i18n="s4n"></span>
-        <h3 data-i18n="s4t"></h3>
-        <p data-i18n="s4p"></p>
-      </div>
-    </div>
+    <ol class="steps rv">
+      <li class="step"><span class="node" aria-hidden="true">01</span><span class="label" data-i18n="s1n"></span><h3 data-i18n="s1t"></h3><p data-i18n="s1p"></p></li>
+      <li class="step"><span class="node" aria-hidden="true">02</span><span class="label" data-i18n="s2n"></span><h3 data-i18n="s2t"></h3><p data-i18n="s2p"></p></li>
+      <li class="step"><span class="node" aria-hidden="true">03</span><span class="label" data-i18n="s3n"></span><h3 data-i18n="s3t"></h3><p data-i18n="s3p"></p></li>
+      <li class="step"><span class="node" aria-hidden="true">04</span><span class="label" data-i18n="s4n"></span><h3 data-i18n="s4t"></h3><p data-i18n="s4p"></p></li>
+    </ol>
   </div>
 </section>
 
-<!-- ============ AFFIDABILITA ============ -->
-<section id="affidabilita">
+<!-- ============ RELIABILITY ============ -->
+<section class="section band grid-bg" id="affidabilita">
   <div class="wrap">
     <div class="sec-head rv">
-      <div class="eyebrow" data-i18n="a_eyebrow"></div>
+      <p class="label eyebrow" data-i18n="a_eyebrow"></p>
       <h2 data-i18n="a_title"></h2>
       <p class="lead" data-i18n="a_lead"></p>
     </div>
-    <div class="rel-card rv">
-      <ol class="chain">
+    <div class="rel-grid">
+      <ol class="ledger rv">
         <li><span class="k" data-i18n="ch1_k"></span><span class="t" data-i18n="ch1_t"></span></li>
         <li><span class="k" data-i18n="ch2_k"></span><span class="t" data-i18n="ch2_t"></span></li>
         <li><span class="k" data-i18n="ch3_k"></span><span class="t" data-i18n="ch3_t"></span></li>
         <li><span class="k" data-i18n="ch4_k"></span><span class="t" data-i18n="ch4_t"></span></li>
         <li><span class="k" data-i18n="ch5_k"></span><span class="t" data-i18n="ch5_t"></span></li>
       </ol>
-      <div class="score">
-        <div class="v">AB</div>
-        <div class="l" data-i18n="a_label"></div>
+      <div class="grade rv">
+        <span class="label" data-i18n="a_label"></span>
+        <div class="tiles">
+          <div class="tile">
+            <b>A</b><span data-i18n="a_src"></span>
+            <div class="scale" aria-hidden="true"><i class="on">A</i><i>B</i><i>C</i><i>D</i><i>E</i></div>
+          </div>
+          <div class="tile">
+            <b>B</b><span data-i18n="a_qual"></span>
+            <div class="scale" aria-hidden="true"><i>A</i><i class="on">B</i><i>C</i><i>D</i><i>E</i></div>
+          </div>
+        </div>
         <p data-i18n="a_desc"></p>
-        <div class="threshold" data-i18n="a_shcs"></div>
+        <p class="threshold" data-i18n="a_shcs"></p>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ============ VISION / MISSION / VALUES ============ -->
-<section id="visione">
+<!-- ============ SERVICES: TWO ENGINES ============ -->
+<section class="section" id="servizi">
   <div class="wrap">
     <div class="sec-head rv">
-      <div class="eyebrow" data-i18n="v_eyebrow"></div>
+      <p class="label eyebrow" data-i18n="sv_eyebrow"></p>
+      <h2 data-i18n="sv_title"></h2>
+      <p class="lead" data-i18n="sv_lead"></p>
+    </div>
+    <div class="engines-grid rv">
+      <article class="engine primary">
+        <span class="label" data-i18n="sv1_k"></span>
+        <h3 data-i18n="sv1_t"></h3>
+        <p data-i18n="sv1_p"></p>
+        <ul class="checklist">
+          <li data-i18n="sv1_l1"></li>
+          <li data-i18n="sv1_l2"></li>
+          <li data-i18n="sv1_l3"></li>
+          <li data-i18n="sv1_l4"></li>
+          <li data-i18n="sv1_l5"></li>
+        </ul>
+      </article>
+      <article class="engine">
+        <span class="label" data-i18n="sv2_k"></span>
+        <h3 data-i18n="sv2_t"></h3>
+        <p data-i18n="sv2_p"></p>
+        <ul class="checklist">
+          <li data-i18n="sv2_l1"></li>
+          <li data-i18n="sv2_l2"></li>
+          <li data-i18n="sv2_l3"></li>
+        </ul>
+      </article>
+    </div>
+    <div class="format rv">
+      <span class="label" data-i18n="fmt_k"></span>
+      <p data-i18n="fmt_t"></p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ WHO IT'S FOR ============ -->
+<section class="section alt" id="per-chi">
+  <div class="wrap for">
+    <div class="rv">
+      <p class="label eyebrow" data-i18n="pos_eyebrow"></p>
+      <h2 data-i18n="pos_title"></h2>
+      <p class="lead" data-i18n="pos_p"></p>
+    </div>
+    <div class="rv">
+      <ul class="audiences">
+        <li data-i18n="au1"></li>
+        <li data-i18n="au2"></li>
+        <li data-i18n="au3"></li>
+        <li data-i18n="au4"></li>
+        <li data-i18n="au5"></li>
+      </ul>
+      <div class="ctas"><a class="btn btn-secondary" href="#contatti"><span data-i18n="pos_cta"></span><span class="arr" aria-hidden="true">→</span></a></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ VISION / MISSION / PRINCIPLES ============ -->
+<section class="section" id="visione">
+  <div class="wrap">
+    <div class="sec-head rv">
+      <p class="label eyebrow" data-i18n="v_eyebrow"></p>
       <h2 data-i18n="v_title"></h2>
     </div>
-    <div class="vm rv">
-      <div class="vm-card">
-        <span class="mono" data-i18n="vis_k"></span>
-        <h3 data-i18n="vis_t"></h3>
-        <p data-i18n="vis_p"></p>
+    <div class="vm">
+      <div class="rv">
+        <div class="statement">
+          <span class="label" data-i18n="vis_k"></span>
+          <h3 data-i18n="vis_t"></h3>
+          <p data-i18n="vis_p"></p>
+        </div>
+        <div class="statement">
+          <span class="label" data-i18n="mis_k"></span>
+          <h3 data-i18n="mis_t"></h3>
+          <p data-i18n="mis_p"></p>
+        </div>
       </div>
-      <div class="vm-card">
-        <span class="mono" data-i18n="mis_k"></span>
-        <h3 data-i18n="mis_t"></h3>
-        <p data-i18n="mis_p"></p>
-      </div>
-    </div>
-    <div class="values rv">
-      <div class="value">
-        <h3><span class="k">V·01</span><span data-i18n="v1t"></span></h3>
-        <p data-i18n="v1p"></p>
-      </div>
-      <div class="value">
-        <h3><span class="k">V·02</span><span data-i18n="v2t"></span></h3>
-        <p data-i18n="v2p"></p>
-      </div>
-      <div class="value">
-        <h3><span class="k">V·03</span><span data-i18n="v3t"></span></h3>
-        <p data-i18n="v3p"></p>
-      </div>
-      <div class="value">
-        <h3><span class="k">V·04</span><span data-i18n="v4t"></span></h3>
-        <p data-i18n="v4p"></p>
+      <div class="rv">
+        <span class="label principles-k" data-i18n="pr_k"></span>
+        <ol class="principles">
+          <li><span class="n" aria-hidden="true">01</span><h3 data-i18n="v1t"></h3><p data-i18n="v1p"></p></li>
+          <li><span class="n" aria-hidden="true">02</span><h3 data-i18n="v2t"></h3><p data-i18n="v2p"></p></li>
+          <li><span class="n" aria-hidden="true">03</span><h3 data-i18n="v3t"></h3><p data-i18n="v3p"></p></li>
+          <li><span class="n" aria-hidden="true">04</span><h3 data-i18n="v4t"></h3><p data-i18n="v4p"></p></li>
+        </ol>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ============ CHI SIAMO ============ -->
-<section id="chi-siamo">
+<!-- ============ TEAM ============ -->
+<section class="section alt" id="chi-siamo">
   <div class="wrap">
     <div class="sec-head rv">
-      <div class="eyebrow" data-i18n="t_eyebrow"></div>
+      <p class="label eyebrow" data-i18n="t_eyebrow"></p>
       <h2 data-i18n="t_title"></h2>
       <p class="lead" data-i18n="t_lead"></p>
     </div>
     <div class="team rv">
-      <div class="member">
-        <div class="avatar">OA</div>
-        <h3>Oleksandr Aleksandrenko</h3>
-        <div class="role">Chief Product &amp; Strategy Officer</div>
+      <article class="member">
+        <div class="member-top"><span class="avatar" aria-hidden="true">OA</span><div><h3>Oleksandr Aleksandrenko</h3><p class="role">Chief Product &amp; Strategy Officer</p></div></div>
         <p data-i18n="b1"></p>
-      </div>
-      <div class="member">
-        <div class="avatar">LP</div>
-        <h3>Leo Peinkhofer</h3>
-        <div class="role">Chief Technology Officer</div>
+      </article>
+      <article class="member">
+        <div class="member-top"><span class="avatar" aria-hidden="true">LP</span><div><h3>Leo Peinkhofer</h3><p class="role">Chief Technology Officer</p></div></div>
         <p data-i18n="b2"></p>
-      </div>
-      <div class="member">
-        <div class="avatar">AM</div>
-        <h3>Alessandro Monachini</h3>
-        <div class="role">Chief Revenue Officer</div>
+      </article>
+      <article class="member">
+        <div class="member-top"><span class="avatar" aria-hidden="true">AM</span><div><h3>Alessandro Monachini</h3><p class="role">Chief Revenue Officer</p></div></div>
         <p data-i18n="b3"></p>
-      </div>
-      <div class="member">
-        <div class="avatar">MF</div>
-        <h3>Manuel Fusco</h3>
-        <div class="role">Chief Marketing Officer</div>
+      </article>
+      <article class="member">
+        <div class="member-top"><span class="avatar" aria-hidden="true">MF</span><div><h3>Manuel Fusco</h3><p class="role">Chief Marketing Officer</p></div></div>
         <p data-i18n="b4"></p>
-      </div>
+      </article>
     </div>
   </div>
 </section>
 
-<!-- ============ POSITIONING ============ -->
-<section id="posizionamento">
-  <div class="wrap">
-    <div class="strip rv">
-      <div>
-        <div class="eyebrow" style="margin-bottom:.9rem" data-i18n="pos_eyebrow"></div>
-        <h3 data-i18n="pos_title"></h3>
-        <p data-i18n="pos_p"></p>
-      </div>
-      <a href="#contatti" class="btn btn-primary" data-i18n="pos_cta"></a>
+<!-- ============ FAQ ============ -->
+<section class="section" id="faq">
+  <div class="wrap faq">
+    <div class="sec-head rv">
+      <p class="label eyebrow" data-i18n="faq_eyebrow"></p>
+      <h2 data-i18n="faq_title"></h2>
+    </div>
+    <div class="rv">
+      <details><summary data-i18n="faq1_q"></summary><p data-i18n="faq1_a"></p></details>
+      <details><summary data-i18n="faq2_q"></summary><p data-i18n="faq2_a"></p></details>
+      <details><summary data-i18n="faq3_q"></summary><p data-i18n="faq3_a"></p></details>
+      <details><summary data-i18n="faq4_q"></summary><p data-i18n="faq4_a"></p></details>
+      <details><summary data-i18n="faq5_q"></summary><p data-i18n="faq5_a"></p></details>
     </div>
   </div>
 </section>
 
-<!-- ============ CTA / CONTATTI ============ -->
-<section id="contatti" style="text-align:center">
-  <div class="wrap rv">
-    <div class="eyebrow" style="justify-content:center" data-i18n="ct_eyebrow"></div>
-    <h2 style="margin:1.2rem auto 1rem;max-width:20ch" data-i18n="ct_title"></h2>
-    <p class="lead" style="margin:0 auto 2.2rem" data-i18n="ct_lead"></p>
-    <div style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap">
-      <a href="mailto:hello@perceptra.eu" class="btn btn-primary" data-i18n="ct_b1"></a>
-      <a href="mailto:hello@perceptra.eu?subject=Pilot" class="btn btn-ghost" data-i18n="ct_b2"></a>
+<!-- ============ CONTACT ============ -->
+<section class="section contact" id="contatti">
+  <div class="grid-bg">
+    <div class="wrap rv">
+      <p class="label eyebrow" data-i18n="ct_eyebrow"></p>
+      <h2 data-i18n="ct_title"></h2>
+      <p class="lead" data-i18n="ct_lead"></p>
+      <div class="ctas">
+        <a class="btn btn-primary" href="mailto:hello@perceptra.eu"><span data-i18n="ct_b1"></span><span class="arr" aria-hidden="true">→</span></a>
+        <a class="btn btn-secondary" href="mailto:hello@perceptra.eu?subject=Pilot" data-i18n="ct_b2"></a>
+      </div>
+      <p class="mail"><span data-i18n="ct_mail"></span> <a href="mailto:hello@perceptra.eu">hello@perceptra.eu</a></p>
     </div>
   </div>
 </section>
+
+</main>
 
 <!-- ============ FOOTER ============ -->
-<footer>
+<footer class="site-footer">
   <div class="wrap">
     <div class="f-grid">
       <div>
-        <a class="brand" href="#top" aria-label="Perceptra — home">
-          <img class="brand-logo brand-logo--full" src="/brand/perceptra-logo-on-dark.svg" alt="Perceptra — Market Intelligence" width="241" height="62">
+        <a class="brand f-brand" href="#top">
+          <img class="logo-light" src="/brand/perceptra-logo-on-light.svg" alt="Perceptra — Market Intelligence" width="226" height="58" loading="lazy">
+          <img class="logo-dark" src="/brand/perceptra-logo-on-dark.svg" alt="Perceptra — Market Intelligence" width="226" height="58" loading="lazy">
         </a>
         <p data-i18n="f_desc"></p>
       </div>
-      <div class="f-col">
-        <h4 data-i18n="f_nav_h"></h4>
-        <a href="#servizi" data-i18n="n_servizi"></a>
+      <nav class="f-col" data-i18n-aria="f_nav_h">
+        <p class="f-h" data-i18n="f_nav_h"></p>
         <a href="#metodo" data-i18n="n_metodo"></a>
         <a href="#affidabilita" data-i18n="n_aff"></a>
+        <a href="#servizi" data-i18n="n_servizi"></a>
         <a href="#chi-siamo" data-i18n="n_chi"></a>
+        <a href="#faq" data-i18n="n_faq"></a>
+      </nav>
+      <div class="f-col">
+        <p class="f-h" data-i18n="f_contact_h"></p>
+        <a href="mailto:hello@perceptra.eu">hello@perceptra.eu</a>
+        <a href="#contatti" data-i18n="n_contact"></a>
+        <a href="https://app.perceptra.eu/login" data-app="login" data-utm="footer" data-i18n="n_login"></a>
       </div>
       <div class="f-col">
-        <h4 data-i18n="f_contact_h"></h4>
-        <a href="mailto:hello@perceptra.eu">hello@perceptra.eu</a>
-        <a href="#contatti" data-i18n="n_cta"></a>
-        <a href="https://app.perceptra.eu/login" data-app="login" data-utm="footer" data-i18n="n_login"></a>
+        <p class="f-h" data-i18n="f_lang_h"></p>
+        <div class="lang" role="group" data-i18n-aria="n_lang">
+          <a href="/" hreflang="it" lang="it" data-lang="it">IT</a>
+          <a href="/en" hreflang="en" lang="en" data-lang="en">EN</a>
+          <a href="/fr" hreflang="fr" lang="fr" data-lang="fr">FR</a>
+        </div>
       </div>
     </div>
     <div class="f-bottom">
@@ -611,100 +795,103 @@ footer{border-top:1px solid var(--line);padding:64px 0 40px}
   </div>
 </footer>
 
-<script>
-/* ================= I18N ================= */
+<script id="i18n">
+/* Translations. The build (seo.mjs) pre-renders one page per language and removes this block. */
 const I18N = {
 it:{
   _title:"Perceptra — Market Intelligence",
-  _desc:"Perceptra ricostruisce i numeri del tuo mercato: dimensioni per prodotto e area, quote, operatori e previsioni. Metodologia proprietaria, ogni numero con fonte e rating.",
+  _desc:"Perceptra ricostruisce i numeri del tuo mercato: dimensione per prodotto e area, quote, operatori e previsioni. Metodo proprietario, fonte e rating su ogni numero.",
+  n_skip:"Vai al contenuto",
+  n_nav:"Navigazione principale",
+  n_menu:"Menu",
+  n_theme:"Tema scuro",
+  n_lang:"Lingua",
   n_metodo:"Metodo",
+  n_aff:"Affidabilità",
+  n_servizi:"Cosa facciamo",
   n_chi:"Chi siamo",
-  n_cta:"Richiedi una demo",
+  n_faq:"Domande",
   n_login:"Accedi",
-  n_signup:"Crea un account",
-  h_eyebrow:"Market intelligence per il B2B europeo",
-  h_title:"I numeri del tuo mercato, <span class='hl'>anche dove nessuno li ha misurati.</span>",
+  n_contact:"Contattaci",
+  h_eyebrow:"Market intelligence · ogni settore, ogni paese",
+  h_title:"I numeri del tuo mercato, <em>anche dove nessuno li ha misurati.</em>",
   h_lead:"Perceptra ricostruisce quanto vale il mercato del tuo prodotto nella tua area, chi sono gli operatori e quale quota occupi. Con una metodologia proprietaria che sceglie fonti e modelli di stima, e con la prova di ogni numero.",
-  h_cta1:"Crea il tuo account",
+  h_cta1:"Parlaci del tuo mercato",
   h_cta2:"Come lavoriamo",
-  h_note:"Servizio gestito end-to-end · Ogni numero con <b>fonte e rating</b>",
+  h_engines:"Due motori",
+  e1:"Market Intelligence",
+  e2:"Audience sintetiche",
   c_title:"Esempio · Studio di mercato",
   c_live:"Triangolazione",
-  c_q:"<span class='mono'>Q&nbsp;·&nbsp;</span>Imballaggi in cartone ondulato · Lombardia · 2026",
-  p_eyebrow:"Il problema",
-  p_title:"I numeri del tuo mercato non sono in vendita.<br>Vanno ricostruiti.",
-  p_p1:"I report di settore costano migliaia di euro, sono nazionali, vecchi di anni e quasi mai parlano del tuo prodotto nella tua area. Le società di consulenza ci arrivano, ma in mesi e con budget da grande impresa.",
-  p_p2:"Intanto le domande restano aperte: quanto vale il mio mercato in questa regione? Chi sono i concorrenti? Che quota ho? Dove crescere l'anno prossimo? Il dato che serve, quasi sempre, non esiste già pronto.",
-  p_p3:"<b>Perceptra lo ricostruisce.</b> Incrociamo statistiche ufficiali, commercio estero, registri delle imprese, bilanci e fonti web, e stimiamo i numeri che mancano con modelli dichiarati. Ogni risultato arriva con le ipotesi, il metodo e il grado di affidabilità.",
-  p_c1_k:"La differenza",
-  p_c1_t:"L'AI è uno strumento intercambiabile. Il metodo con cui la guidiamo no: è il nostro vantaggio, e migliora a ogni studio.",
-  p_c2_k:"Il formato",
-  p_c2_t:"Servizio gestito, non un altro tool. Ci porti una domanda di business, ti consegniamo un report pronto per decidere.",
-  m_eyebrow:"Il metodo",
-  m_title:"Il metodo Perceptra. È qui il nostro vantaggio.",
-  m_lead:"Quando il dato non esiste, il risultato dipende da come lo ricostruisci. Il nostro modello decide quali approcci di stima usare, dove cercare i dati e come incrociarli. È un sapere che si accumula studio dopo studio.",
-  s1n:"FASE 01",
-  s1t:"Inquadramento",
-  s1p:"Traduciamo la tua domanda in prodotto, classificazioni statistiche, area geografica e orizzonte temporale.",
-  s2n:"FASE 02",
-  s2t:"Fonti e modelli",
-  s2p:"Il modello Perceptra sceglie le fonti (statistiche ufficiali, commercio estero, registri, bilanci, web) e i metodi di stima adatti al caso.",
-  s3n:"FASE 03",
-  s3t:"Ricostruzione e triangolazione",
-  s3p:"Stimiamo lo stesso numero con approcci indipendenti e li confrontiamo. Le ipotesi sono scritte, mai implicite.",
-  s4n:"FASE 04",
-  s4t:"Report decisionale",
-  s4p:"Risultati, ipotesi, metodo e confidenza, con una lettura che ti aiuta a decidere. Non una dashboard da interpretare.",
-  v_eyebrow:"Perché esistiamo",
-  v_title:"Visione, missione e i principi da cui non deroghiamo.",
-  vis_k:"Visione",
-  vis_t:"Ogni azienda europea decide conoscendo il proprio mercato.",
-  vis_p:"Oggi i numeri di mercato affidabili sono un privilegio di chi può pagare mesi di consulenza. Vogliamo renderli rapidi e accessibili a PMI, startup e studi professionali, ed essere il primo nome a cui pensano in Europa.",
-  mis_k:"Missione",
-  mis_t:"Ricostruire con metodo i dati di mercato che non esistono già pronti.",
-  mis_p:"Uniamo fonti pubbliche e private, modelli di stima e intelligenza artificiale sotto una metodologia proprietaria, per consegnare numeri difendibili in tempi e a costi compatibili con le aziende reali.",
-  v1t:"Il metodo prima del modello",
-  v1p:"I modelli di AI cambiano ogni anno. Il nostro vantaggio è il metodo che li guida: quali fonti, quali stime, quali verifiche.",
-  v2t:"Nessun numero orfano",
-  v2p:"Ogni cifra risale alla sua fonte attraverso calcoli ed evidenze documentate. Se non possiamo dimostrarla, non la consegniamo.",
-  v3t:"Ipotesi dichiarate",
-  v3p:"Distinguiamo sempre ciò che è misurato da ciò che è stimato, e diciamo con quale confidenza. Nessuna scatola nera presentata come certezza.",
-  v4t:"Rigore accessibile",
-  v4p:"La qualità dell'analisi non deve dipendere dalla dimensione del budget. Costruiamo per chi finora doveva scegliere tra decidere alla cieca o non decidere.",
-  t_eyebrow:"Chi siamo",
-  t_title:"Quattro fondatori, un'ossessione: numeri di cui fidarsi.",
-  t_lead:"Prodotto, tecnologia, revenue e marketing sotto lo stesso tetto fin dal primo giorno. Nessun reparto in outsourcing, nessuna competenza di facciata.",
-  b1:"Disegna il prodotto, la strategia e la metodologia di Market Intelligence. Background in finanza istituzionale e system design: la disciplina della misurazione applicata ai mercati.",
-  b2:"Guida la tecnologia di Perceptra: architettura della piattaforma, audience sintetiche e calibrazione dei modelli.",
-  b3:"Porta Perceptra sul mercato. Esperienza commerciale sul campo nel B2B: conosce le domande che i clienti fanno davvero, non quelle dei pitch deck.",
-  b4:"Costruisce il brand e la domanda. Marketing come trasferimento di fiducia: la stessa trasparenza che chiediamo ai nostri dati, applicata alla comunicazione.",
-  pos_eyebrow:"Posizionamento",
-  pos_title:"Più preciso di un report di settore. Più rapido e accessibile di una società di consulenza.",
-  pos_p:"Per PMI e startup B2B, produttori e distributori, agenzie di marketing, commercialisti e società di consulenza: chi ha bisogno dei numeri veri del proprio mercato senza un budget da grande impresa.",
-  pos_cta:"Parliamone",
-  ct_eyebrow:"Inizia da qui",
-  ct_title:"Dicci il tuo mercato. Lo misuriamo.",
-  ct_lead:"Uno studio pilota sul tuo prodotto e la tua area: stesso metodo, fonti dichiarate, un rating su ogni numero. Vedi il risultato prima di decidere.",
-  ct_b1:"Richiedi una demo",
-  ct_b2:"Proponi uno studio pilota",
-  f_desc:"Market intelligence per le aziende europee: i numeri del tuo mercato, ricostruiti con metodo, ognuno con la sua fonte e il suo rating.",
-  f_nav_h:"Naviga",
-  f_contact_h:"Contatti",
-  f_copy:"© 2026 Perceptra. Tutti i diritti riservati.",
-  n_servizi:"Cosa facciamo",
-  n_aff:"Affidabilità",
-  c_axis:"Valore del mercato, € M",
+  c_q:"Imballaggi in cartone ondulato · Lombardia · 2026",
   c_m1:"<b>Top-down</b>produzione + import − export",
   c_m2:"<b>Bottom-up</b>operatori mappati",
   c_m3:"<b>Domanda</b>settori a valle",
   c_m4:"<b>Stima Perceptra</b>intervallo di confidenza",
+  c_axis:"Valore del mercato, € M",
   c_val:"Stima centrale",
   c_rng:"Intervallo",
   c_rat:"Rating",
   c_v1:"€ 412 M",
   c_v2:"± 4%",
+  c_note:"Dati illustrativi",
+  c_sum:"Esempio illustrativo: tre stime indipendenti (top-down, bottom-up e domanda) convergono su un mercato di circa 412 milioni di euro, con intervallo di ± 4% e rating AB.",
+  pf1_k:"Fonte e rating",
+  pf1_t:"Ogni numero risale alla sua fonte e porta un rating di due lettere, da A a E.",
+  pf2_k:"Triangolazione",
+  pf2_t:"Stimiamo lo stesso numero con approcci indipendenti e li confrontiamo.",
+  pf3_k:"Ipotesi dichiarate",
+  pf3_t:"Distinguiamo sempre ciò che è misurato da ciò che è stimato, e con quale confidenza.",
+  p_eyebrow:"Il problema",
+  p_title:"I numeri del tuo mercato non sono in vendita. <em>Vanno ricostruiti.</em>",
+  p_q_k:"Le domande che restano aperte",
+  q1:"Quanto vale il mio mercato in questa regione?",
+  q2:"Chi sono i concorrenti?",
+  q3:"Che quota ho?",
+  q4:"Dove crescere l'anno prossimo?",
+  p_lead:"Il dato che serve, quasi sempre, non esiste già pronto.",
+  cmp1_k:"Report di settore",
+  cmp1_t:"Costano migliaia di euro, sono nazionali, vecchi di anni e quasi mai parlano del tuo prodotto nella tua area.",
+  cmp2_k:"Società di consulenza",
+  cmp2_t:"Ci arrivano, ma in mesi e con budget da grande impresa.",
+  cmp3_t:"Lo ricostruisce. Incrociamo statistiche ufficiali, commercio estero, registri delle imprese, bilanci e fonti web, e stimiamo i numeri che mancano con modelli dichiarati.",
+  m_eyebrow:"Il metodo",
+  m_title:"Il metodo Perceptra. <em>È qui il nostro vantaggio.</em>",
+  m_lead:"Quando il dato non esiste, il risultato dipende da come lo ricostruisci. Il nostro modello decide quali approcci di stima usare, dove cercare i dati e come incrociarli. È un sapere che si accumula studio dopo studio.",
+  m_q_k:"La differenza",
+  m_q:"L'AI è uno strumento intercambiabile. Il metodo con cui la guidiamo no: è il nostro vantaggio, e migliora a ogni studio.",
+  s1n:"Fase 01",
+  s1t:"Inquadramento",
+  s1p:"Traduciamo la tua domanda in prodotto, classificazioni statistiche, area geografica e orizzonte temporale.",
+  s2n:"Fase 02",
+  s2t:"Fonti e modelli",
+  s2p:"Il modello Perceptra sceglie le fonti (statistiche ufficiali, commercio estero, registri, bilanci, web) e i metodi di stima adatti al caso.",
+  s3n:"Fase 03",
+  s3t:"Ricostruzione e triangolazione",
+  s3p:"Stimiamo lo stesso numero con approcci indipendenti e li confrontiamo. Le ipotesi sono scritte, mai implicite.",
+  s4n:"Fase 04",
+  s4t:"Report decisionale",
+  s4p:"Risultati, ipotesi, metodo e confidenza, con una lettura che ti aiuta a decidere. Non una dashboard da interpretare.",
+  a_eyebrow:"Affidabilità",
+  a_title:"Ogni numero ha una prova. <em>Ogni prova ha un voto.</em>",
+  a_lead:"Nei nostri report nessun numero è orfano: puoi risalire dal risultato al calcolo, dal calcolo all'evidenza, dall'evidenza alla fonte. E ogni dato porta un rating di due lettere: affidabilità della fonte e qualità del dato.",
+  ch1_k:"Report",
+  ch1_t:"Mercato 2026: € 412 M<span>stima centrale, intervallo ± 4%</span>",
+  ch2_k:"Risultato",
+  ch2_t:"Consumo apparente regionale<span>quota della Lombardia sul dato nazionale</span>",
+  ch3_k:"Calcolo",
+  ch3_t:"Produzione + import − export<span>ripartito per addetti dei settori utilizzatori</span>",
+  ch4_k:"Evidenza",
+  ch4_t:"Valore della produzione nazionale<span>serie annuale, ultimo anno disponibile</span>",
+  ch5_k:"Fonte",
+  ch5_t:"Istituto statistico ufficiale<span>affidabilità della fonte: classe A</span>",
+  a_label:"Rating del dato · esempio",
+  a_src:"Affidabilità della fonte",
+  a_qual:"Qualità del dato",
+  a_desc:"Prima lettera: affidabilità della fonte. Seconda lettera: qualità del dato. Da A a E, dichiarato su ogni numero.",
+  a_shcs:"Audience sintetiche: SHCS ≥ 0,80. Sotto soglia, lo studio non esce.",
   sv_eyebrow:"Cosa facciamo",
-  sv_title:"Due motori, un solo standard di rigore.",
+  sv_title:"Due motori, <em>un solo standard di rigore.</em>",
   sv_lead:"La Market Intelligence misura il mercato. Le audience sintetiche ne anticipano le reazioni. Si usano da sole o insieme, nello stesso studio.",
   sv1_k:"Servizio principale",
   sv1_t:"Market Intelligence",
@@ -720,115 +907,160 @@ it:{
   sv2_l1:"Concept, claim, packaging e pricing test",
   sv2_l2:"Calibrazione su un panel umano di controllo",
   sv2_l3:"Punteggio SHCS su ogni studio",
-  a_eyebrow:"Affidabilità",
-  a_title:"Ogni numero ha una prova. Ogni prova ha un voto.",
-  a_lead:"Nei nostri report nessun numero è orfano: puoi risalire dal risultato al calcolo, dal calcolo all'evidenza, dall'evidenza alla fonte. E ogni dato porta un rating di due lettere: affidabilità della fonte e qualità del dato.",
-  ch1_k:"Report",
-  ch1_t:"Mercato 2026: € 412 M<span>stima centrale, intervallo ± 4%</span>",
-  ch2_k:"Risultato",
-  ch2_t:"Consumo apparente regionale<span>quota della Lombardia sul dato nazionale</span>",
-  ch3_k:"Calcolo",
-  ch3_t:"Produzione + import − export<span>ripartito per addetti dei settori utilizzatori</span>",
-  ch4_k:"Evidenza",
-  ch4_t:"Valore della produzione nazionale<span>serie annuale, ultimo anno disponibile</span>",
-  ch5_k:"Fonte",
-  ch5_t:"Istituto statistico ufficiale<span>affidabilità della fonte: classe A</span>",
-  a_label:"Rating del dato · esempio",
-  a_desc:"Prima lettera: affidabilità della fonte. Seconda lettera: qualità del dato. Da A a E, dichiarato su ogni numero.",
-  a_shcs:"AUDIENCE SINTETICHE: SHCS ≥ 0.80 — sotto soglia, lo studio non esce.",
+  fmt_k:"Il formato",
+  fmt_t:"Servizio gestito, non un altro tool. Ci porti una domanda di business, ti consegniamo un report pronto per decidere.",
+  pos_eyebrow:"Per chi",
+  pos_title:"Più preciso di un report di settore. Più rapido e accessibile di una società di consulenza.",
+  pos_p:"Per chi ha bisogno dei numeri veri del proprio mercato senza un budget da grande impresa.",
+  au1:"PMI e startup B2B",
+  au2:"Produttori e distributori",
+  au3:"Agenzie di marketing",
+  au4:"Commercialisti",
+  au5:"Società di consulenza",
+  pos_cta:"Parliamone",
+  v_eyebrow:"Perché esistiamo",
+  v_title:"Visione, missione e i principi da cui non deroghiamo.",
+  vis_k:"Visione",
+  vis_t:"Ogni azienda europea decide conoscendo il proprio mercato.",
+  vis_p:"Oggi i numeri di mercato affidabili sono un privilegio di chi può pagare mesi di consulenza. Vogliamo renderli rapidi e accessibili a PMI, startup e studi professionali, ed essere il primo nome a cui pensano in Europa.",
+  mis_k:"Missione",
+  mis_t:"Ricostruire con metodo i dati di mercato che non esistono già pronti.",
+  mis_p:"Uniamo fonti pubbliche e private, modelli di stima e intelligenza artificiale sotto una metodologia proprietaria, per consegnare numeri difendibili in tempi e a costi compatibili con le aziende reali.",
+  pr_k:"Principi",
+  v1t:"Il metodo prima del modello",
+  v1p:"I modelli di AI cambiano ogni anno. Il nostro vantaggio è il metodo che li guida: quali fonti, quali stime, quali verifiche.",
+  v2t:"Nessun numero orfano",
+  v2p:"Ogni cifra risale alla sua fonte attraverso calcoli ed evidenze documentate. Se non possiamo dimostrarla, non la consegniamo.",
+  v3t:"Ipotesi dichiarate",
+  v3p:"Distinguiamo sempre ciò che è misurato da ciò che è stimato, e diciamo con quale confidenza. Nessuna scatola nera presentata come certezza.",
+  v4t:"Rigore accessibile",
+  v4p:"La qualità dell'analisi non deve dipendere dalla dimensione del budget. Costruiamo per chi finora doveva scegliere tra decidere alla cieca o non decidere.",
+  t_eyebrow:"Chi siamo",
+  t_title:"Quattro fondatori, un'ossessione: <em>numeri di cui fidarsi.</em>",
+  t_lead:"Prodotto, tecnologia, revenue e marketing sotto lo stesso tetto fin dal primo giorno. Nessun reparto in outsourcing, nessuna competenza di facciata.",
+  b1:"Disegna il prodotto, la strategia e la metodologia di Market Intelligence. Background in finanza istituzionale e system design: la disciplina della misurazione applicata ai mercati.",
+  b2:"Guida la tecnologia di Perceptra: architettura della piattaforma, audience sintetiche e calibrazione dei modelli.",
+  b3:"Porta Perceptra sul mercato. Esperienza commerciale sul campo nel B2B: conosce le domande che i clienti fanno davvero, non quelle dei pitch deck.",
+  b4:"Costruisce il brand e la domanda. Marketing come trasferimento di fiducia: la stessa trasparenza che chiediamo ai nostri dati, applicata alla comunicazione.",
+  faq_eyebrow:"Domande frequenti",
+  faq_title:"Le risposte brevi.",
+  faq1_q:"Che cosa fa Perceptra?",
+  faq1_a:"Ricostruisce i numeri di un mercato: dimensione per prodotto e area geografica, quote di mercato, operatori e previsioni. Quando i dati non sono disponibili direttamente, li stima incrociando più fonti e metodi.",
+  faq2_q:"Come stimate un mercato se i dati non esistono?",
+  faq2_a:"Con una metodologia proprietaria: scegliamo le fonti (statistiche ufficiali, commercio estero, registri delle imprese, bilanci, web) e più approcci di stima indipendenti, poi li confrontiamo. Ipotesi e metodo sono sempre dichiarati nel report.",
+  faq3_q:"Che cos'è il rating di affidabilità?",
+  faq3_a:"Ogni dato riporta due lettere da A a E: la prima indica l'affidabilità della fonte, la seconda la qualità del dato. Ogni numero del report si può ricondurre al calcolo, all'evidenza e alla fonte da cui deriva.",
+  faq4_q:"Che cosa sono le audience sintetiche?",
+  faq4_a:"Focus group simulati con audience sintetiche calibrate su un panel umano di controllo, per testare concept, claim, packaging e prezzi prima del lancio. Ogni studio riporta lo SHCS e non viene consegnato sotto 0,80.",
+  faq5_q:"A chi si rivolge Perceptra?",
+  faq5_a:"A PMI e startup B2B, produttori e distributori, agenzie di marketing, commercialisti e società di consulenza che hanno bisogno dei numeri reali del proprio mercato senza un budget da grande impresa.",
+  ct_eyebrow:"Inizia da qui",
+  ct_title:"Dicci il tuo mercato. <em>Lo misuriamo.</em>",
+  ct_lead:"Uno studio pilota sul tuo prodotto e la tua area: stesso metodo, fonti dichiarate, un rating su ogni numero. Vedi il risultato prima di decidere.",
+  ct_b1:"Scrivici",
+  ct_b2:"Proponi uno studio pilota",
+  ct_mail:"Oppure scrivi direttamente a",
+  f_desc:"Market intelligence: i numeri del tuo mercato, ricostruiti con metodo, ognuno con la sua fonte e il suo rating.",
+  f_nav_h:"Naviga",
+  f_contact_h:"Contatti",
+  f_lang_h:"Lingua",
+  f_copy:"© 2026 Perceptra",
   f_line:"Market Intelligence · Audience sintetiche"
 },
 en:{
   _title:"Perceptra — Market Intelligence",
-  _desc:"Perceptra rebuilds the numbers of your market: size by product and area, market shares, operators and forecasts. Proprietary methodology, every figure with its source and rating.",
+  _desc:"Perceptra rebuilds the numbers of your market: size by product and area, shares, operators and forecasts. Proprietary method, source and rating on every figure.",
+  n_skip:"Skip to content",
+  n_nav:"Main navigation",
+  n_menu:"Menu",
+  n_theme:"Dark theme",
+  n_lang:"Language",
   n_metodo:"Method",
+  n_aff:"Reliability",
+  n_servizi:"What we do",
   n_chi:"About us",
-  n_cta:"Request a demo",
+  n_faq:"FAQ",
   n_login:"Log in",
-  n_signup:"Create an account",
-  h_eyebrow:"Market intelligence for European B2B",
-  h_title:"Your market in numbers, <span class='hl'>even where no one has measured it.</span>",
+  n_contact:"Contact us",
+  h_eyebrow:"Market intelligence · any sector, any country",
+  h_title:"Your market in numbers, <em>even where no one has measured it.</em>",
   h_lead:"Perceptra reconstructs what your product's market is worth in your area, who the operators are and how much of it you hold. With a proprietary methodology that chooses sources and estimation models, and with proof behind every figure.",
-  h_cta1:"Create your account",
+  h_cta1:"Tell us about your market",
   h_cta2:"How we work",
-  h_note:"End-to-end managed service · Every figure with <b>source and rating</b>",
+  h_engines:"Two engines",
+  e1:"Market Intelligence",
+  e2:"Synthetic audiences",
   c_title:"Example · Market study",
   c_live:"Triangulating",
-  c_q:"<span class='mono'>Q&nbsp;·&nbsp;</span>Corrugated board packaging · Lombardy · 2026",
-  p_eyebrow:"The problem",
-  p_title:"Your market's numbers aren't for sale.<br>They have to be rebuilt.",
-  p_p1:"Industry reports cost thousands, cover whole countries, are years old and rarely speak about your product in your area. Consulting firms get there, but in months and on enterprise budgets.",
-  p_p2:"Meanwhile the questions stay open: what is my market worth in this region? Who are my competitors? What is my share? Where should I grow next year? The data you need almost never exists ready-made.",
-  p_p3:"<b>Perceptra rebuilds it.</b> We cross official statistics, foreign trade, business registers, financial statements and web sources, and estimate the missing numbers with stated models. Every result comes with its assumptions, method and level of reliability.",
-  p_c1_k:"The difference",
-  p_c1_t:"AI is an interchangeable tool. The method we steer it with is not: it is our edge, and it improves with every study.",
-  p_c2_k:"The format",
-  p_c2_t:"A managed service, not another tool. You bring a business question; we deliver a report ready for decision-making.",
-  m_eyebrow:"The method",
-  m_title:"The Perceptra method. This is our edge.",
-  m_lead:"When the data doesn't exist, the result depends on how you rebuild it. Our model decides which estimation approaches to use, where to look for data and how to cross-check it. That know-how compounds, study after study.",
-  s1n:"PHASE 01",
-  s1t:"Framing",
-  s1p:"We translate your question into product, statistical classifications, geography and time horizon.",
-  s2n:"PHASE 02",
-  s2t:"Sources and models",
-  s2p:"The Perceptra model picks the sources (official statistics, foreign trade, registers, financial statements, web) and the estimation methods that fit the case.",
-  s3n:"PHASE 03",
-  s3t:"Reconstruction and triangulation",
-  s3p:"We estimate the same number with independent approaches and compare them. Assumptions are written down, never implicit.",
-  s4n:"PHASE 04",
-  s4t:"Decision report",
-  s4p:"Findings, assumptions, method and confidence, with a reading that helps you decide. Not a dashboard left for you to interpret.",
-  v_eyebrow:"Why we exist",
-  v_title:"Vision, mission and the principles we don't bend.",
-  vis_k:"Vision",
-  vis_t:"Every European company deciding with real knowledge of its market.",
-  vis_p:"Today reliable market numbers are a privilege of those who can pay for months of consulting. We want to make them fast and affordable for SMEs, startups and professional firms, and to be the first name they think of in Europe.",
-  mis_k:"Mission",
-  mis_t:"Rebuilding, with method, the market data that doesn't exist ready-made.",
-  mis_p:"We bring public and private sources, estimation models and artificial intelligence under one proprietary methodology, to deliver defensible numbers on timelines and budgets that fit real companies.",
-  v1t:"Method before model",
-  v1p:"AI models change every year. Our edge is the method that steers them: which sources, which estimates, which checks.",
-  v2t:"No orphan numbers",
-  v2p:"Every figure traces back to its source through documented calculations and evidence. If we can't prove it, we don't deliver it.",
-  v3t:"Stated assumptions",
-  v3p:"We always separate what is measured from what is estimated, and say with what confidence. No black box dressed up as certainty.",
-  v4t:"Accessible rigour",
-  v4p:"The quality of analysis shouldn't depend on budget size. We build for those who until now had to choose between deciding blind and not deciding at all.",
-  t_eyebrow:"About us",
-  t_title:"Four founders, one obsession: numbers you can trust.",
-  t_lead:"Product, technology, revenue and marketing under one roof from day one. No outsourced departments, no borrowed expertise.",
-  b1:"Designs the product, the strategy and the Market Intelligence methodology. Background in institutional finance and system design: the discipline of measurement applied to markets.",
-  b2:"Leads Perceptra's technology: platform architecture, synthetic audiences and model calibration.",
-  b3:"Takes Perceptra to market. Hands-on B2B commercial experience: he knows the questions clients actually ask, not the ones in pitch decks.",
-  b4:"Builds the brand and the demand. Marketing as a transfer of trust: the same transparency we demand of our data, applied to how we communicate.",
-  pos_eyebrow:"Positioning",
-  pos_title:"More precise than an industry report. Faster and more affordable than a consulting firm.",
-  pos_p:"For B2B SMEs and startups, manufacturers and distributors, marketing agencies, accountants and consulting firms: anyone who needs the real numbers of their market without an enterprise budget.",
-  pos_cta:"Let's talk",
-  ct_eyebrow:"Start here",
-  ct_title:"Tell us your market. We'll measure it.",
-  ct_lead:"A pilot study on your product and your area: same method, stated sources, a rating on every figure. See the result before you decide.",
-  ct_b1:"Request a demo",
-  ct_b2:"Propose a pilot study",
-  f_desc:"Market intelligence for European companies: the numbers of your market, rebuilt with method, each with its source and rating.",
-  f_nav_h:"Navigate",
-  f_contact_h:"Contact",
-  f_copy:"© 2026 Perceptra. All rights reserved.",
-  n_servizi:"What we do",
-  n_aff:"Reliability",
-  c_axis:"Market value, € M",
+  c_q:"Corrugated board packaging · Lombardy · 2026",
   c_m1:"<b>Top-down</b>production + imports − exports",
   c_m2:"<b>Bottom-up</b>mapped operators",
   c_m3:"<b>Demand</b>downstream sectors",
   c_m4:"<b>Perceptra estimate</b>confidence interval",
+  c_axis:"Market value, € M",
   c_val:"Central estimate",
   c_rng:"Interval",
   c_rat:"Rating",
   c_v1:"€412M",
   c_v2:"± 4%",
+  c_note:"Illustrative data",
+  c_sum:"Illustrative example: three independent estimates (top-down, bottom-up and demand) converge on a market of about €412M, with a ± 4% interval and an AB rating.",
+  pf1_k:"Source and rating",
+  pf1_t:"Every figure traces back to its source and carries a two-letter rating, from A to E.",
+  pf2_k:"Triangulation",
+  pf2_t:"We estimate the same number with independent approaches and compare them.",
+  pf3_k:"Stated assumptions",
+  pf3_t:"We always separate what is measured from what is estimated, and with what confidence.",
+  p_eyebrow:"The problem",
+  p_title:"Your market's numbers aren't for sale. <em>They have to be rebuilt.</em>",
+  p_q_k:"The questions that stay open",
+  q1:"What is my market worth in this region?",
+  q2:"Who are my competitors?",
+  q3:"What is my share?",
+  q4:"Where should I grow next year?",
+  p_lead:"The data you need almost never exists ready-made.",
+  cmp1_k:"Industry reports",
+  cmp1_t:"They cost thousands, cover whole countries, are years old and rarely speak about your product in your area.",
+  cmp2_k:"Consulting firms",
+  cmp2_t:"They get there, but in months and on enterprise budgets.",
+  cmp3_t:"Rebuilds it. We cross official statistics, foreign trade, business registers, financial statements and web sources, and estimate the missing numbers with stated models.",
+  m_eyebrow:"The method",
+  m_title:"The Perceptra method. <em>This is our edge.</em>",
+  m_lead:"When the data doesn't exist, the result depends on how you rebuild it. Our model decides which estimation approaches to use, where to look for data and how to cross-check it. That know-how compounds, study after study.",
+  m_q_k:"The difference",
+  m_q:"AI is an interchangeable tool. The method we steer it with is not: it is our edge, and it improves with every study.",
+  s1n:"Phase 01",
+  s1t:"Framing",
+  s1p:"We translate your question into product, statistical classifications, geography and time horizon.",
+  s2n:"Phase 02",
+  s2t:"Sources and models",
+  s2p:"The Perceptra model picks the sources (official statistics, foreign trade, registers, financial statements, web) and the estimation methods that fit the case.",
+  s3n:"Phase 03",
+  s3t:"Reconstruction and triangulation",
+  s3p:"We estimate the same number with independent approaches and compare them. Assumptions are written down, never implicit.",
+  s4n:"Phase 04",
+  s4t:"Decision report",
+  s4p:"Findings, assumptions, method and confidence, with a reading that helps you decide. Not a dashboard left for you to interpret.",
+  a_eyebrow:"Reliability",
+  a_title:"Every number has proof. <em>Every proof has a grade.</em>",
+  a_lead:"In our reports no figure is an orphan: you can trace a finding to its calculation, the calculation to its evidence, the evidence to its source. And every data point carries a two-letter rating: source reliability and data quality.",
+  ch1_k:"Report",
+  ch1_t:"Market 2026: €412M<span>central estimate, interval ± 4%</span>",
+  ch2_k:"Finding",
+  ch2_t:"Regional apparent consumption<span>Lombardy's share of the national figure</span>",
+  ch3_k:"Calculation",
+  ch3_t:"Production + imports − exports<span>allocated by employment in user industries</span>",
+  ch4_k:"Evidence",
+  ch4_t:"Value of national production<span>annual series, latest available year</span>",
+  ch5_k:"Source",
+  ch5_t:"Official statistics office<span>source reliability: class A</span>",
+  a_label:"Data rating · example",
+  a_src:"Source reliability",
+  a_qual:"Data quality",
+  a_desc:"First letter: source reliability. Second letter: data quality. From A to E, stated on every figure.",
+  a_shcs:"Synthetic audiences: SHCS ≥ 0.80. Below the threshold, the study doesn't ship.",
   sv_eyebrow:"What we do",
-  sv_title:"Two engines, one standard of rigour.",
+  sv_title:"Two engines, <em>one standard of rigour.</em>",
   sv_lead:"Market Intelligence measures the market. Synthetic audiences anticipate how it will react. Use them on their own or together, in the same study.",
   sv1_k:"Core service",
   sv1_t:"Market Intelligence",
@@ -844,115 +1076,160 @@ en:{
   sv2_l1:"Concept, claim, packaging and pricing tests",
   sv2_l2:"Calibration against a human control panel",
   sv2_l3:"SHCS score on every study",
-  a_eyebrow:"Reliability",
-  a_title:"Every number has proof. Every proof has a grade.",
-  a_lead:"In our reports no figure is an orphan: you can trace a finding to its calculation, the calculation to its evidence, the evidence to its source. And every data point carries a two-letter rating: source reliability and data quality.",
-  ch1_k:"Report",
-  ch1_t:"Market 2026: €412M<span>central estimate, interval ± 4%</span>",
-  ch2_k:"Finding",
-  ch2_t:"Regional apparent consumption<span>Lombardy's share of the national figure</span>",
-  ch3_k:"Calculation",
-  ch3_t:"Production + imports − exports<span>allocated by employment in user industries</span>",
-  ch4_k:"Evidence",
-  ch4_t:"Value of national production<span>annual series, latest available year</span>",
-  ch5_k:"Source",
-  ch5_t:"Official statistics office<span>source reliability: class A</span>",
-  a_label:"Data rating · example",
-  a_desc:"First letter: source reliability. Second letter: data quality. From A to E, stated on every figure.",
-  a_shcs:"SYNTHETIC AUDIENCES: SHCS ≥ 0.80 — below the threshold, the study doesn't ship.",
+  fmt_k:"The format",
+  fmt_t:"A managed service, not another tool. You bring a business question; we deliver a report ready for decision-making.",
+  pos_eyebrow:"Who it's for",
+  pos_title:"More precise than an industry report. Faster and more affordable than a consulting firm.",
+  pos_p:"For anyone who needs the real numbers of their market without an enterprise budget.",
+  au1:"B2B SMEs and startups",
+  au2:"Manufacturers and distributors",
+  au3:"Marketing agencies",
+  au4:"Accountants",
+  au5:"Consulting firms",
+  pos_cta:"Let's talk",
+  v_eyebrow:"Why we exist",
+  v_title:"Vision, mission and the principles we don't bend.",
+  vis_k:"Vision",
+  vis_t:"Every European company deciding with real knowledge of its market.",
+  vis_p:"Today reliable market numbers are a privilege of those who can pay for months of consulting. We want to make them fast and affordable for SMEs, startups and professional firms, and to be the first name they think of in Europe.",
+  mis_k:"Mission",
+  mis_t:"Rebuilding, with method, the market data that doesn't exist ready-made.",
+  mis_p:"We bring public and private sources, estimation models and artificial intelligence under one proprietary methodology, to deliver defensible numbers on timelines and budgets that fit real companies.",
+  pr_k:"Principles",
+  v1t:"Method before model",
+  v1p:"AI models change every year. Our edge is the method that steers them: which sources, which estimates, which checks.",
+  v2t:"No orphan numbers",
+  v2p:"Every figure traces back to its source through documented calculations and evidence. If we can't prove it, we don't deliver it.",
+  v3t:"Stated assumptions",
+  v3p:"We always separate what is measured from what is estimated, and say with what confidence. No black box dressed up as certainty.",
+  v4t:"Accessible rigour",
+  v4p:"The quality of analysis shouldn't depend on budget size. We build for those who until now had to choose between deciding blind and not deciding at all.",
+  t_eyebrow:"About us",
+  t_title:"Four founders, one obsession: <em>numbers you can trust.</em>",
+  t_lead:"Product, technology, revenue and marketing under one roof from day one. No outsourced departments, no borrowed expertise.",
+  b1:"Designs the product, the strategy and the Market Intelligence methodology. Background in institutional finance and system design: the discipline of measurement applied to markets.",
+  b2:"Leads Perceptra's technology: platform architecture, synthetic audiences and model calibration.",
+  b3:"Takes Perceptra to market. Hands-on B2B commercial experience: he knows the questions clients actually ask, not the ones in pitch decks.",
+  b4:"Builds the brand and the demand. Marketing as a transfer of trust: the same transparency we demand of our data, applied to how we communicate.",
+  faq_eyebrow:"FAQ",
+  faq_title:"The short answers.",
+  faq1_q:"What does Perceptra do?",
+  faq1_a:"It rebuilds the numbers of a market: size by product and geographic area, market shares, operators and forecasts. When the data isn't directly available, it estimates it by crossing several sources and methods.",
+  faq2_q:"How do you estimate a market when the data doesn't exist?",
+  faq2_a:"With a proprietary methodology: we choose the sources (official statistics, foreign trade, business registers, financial statements, web) and several independent estimation approaches, then compare them. Assumptions and method are always stated in the report.",
+  faq3_q:"What is the reliability rating?",
+  faq3_a:"Every data point carries two letters from A to E: the first is the reliability of the source, the second the quality of the data. Every figure in the report can be traced back to the calculation, the evidence and the source it comes from.",
+  faq4_q:"What are synthetic audiences?",
+  faq4_a:"Simulated focus groups with synthetic audiences calibrated on a human control panel, to test concepts, claims, packaging and prices before launch. Every study reports its SHCS and is not delivered below 0.80.",
+  faq5_q:"Who is Perceptra for?",
+  faq5_a:"B2B SMEs and startups, manufacturers and distributors, marketing agencies, accountants and consulting firms that need the real numbers of their market without an enterprise budget.",
+  ct_eyebrow:"Start here",
+  ct_title:"Tell us your market. <em>We'll measure it.</em>",
+  ct_lead:"A pilot study on your product and your area: same method, stated sources, a rating on every figure. See the result before you decide.",
+  ct_b1:"Write to us",
+  ct_b2:"Propose a pilot study",
+  ct_mail:"Or write directly to",
+  f_desc:"Market intelligence: the numbers of your market, rebuilt with method, each with its source and rating.",
+  f_nav_h:"Navigate",
+  f_contact_h:"Contact",
+  f_lang_h:"Language",
+  f_copy:"© 2026 Perceptra",
   f_line:"Market Intelligence · Synthetic audiences"
 },
 fr:{
   _title:"Perceptra — Market Intelligence",
-  _desc:"Perceptra reconstitue les chiffres de votre marché : taille par produit et par zone, parts de marché, acteurs et prévisions. Méthodologie propriétaire, chaque chiffre avec sa source et sa notation.",
+  _desc:"Perceptra reconstitue les chiffres de votre marché : taille par produit et zone, parts, acteurs et prévisions. Méthode propriétaire, source et notation sur chaque chiffre.",
+  n_skip:"Aller au contenu",
+  n_nav:"Navigation principale",
+  n_menu:"Menu",
+  n_theme:"Thème sombre",
+  n_lang:"Langue",
   n_metodo:"Méthode",
+  n_aff:"Fiabilité",
+  n_servizi:"Nos services",
   n_chi:"Qui sommes-nous",
-  n_cta:"Demander une démo",
+  n_faq:"Questions",
   n_login:"Se connecter",
-  n_signup:"Créer un compte",
-  h_eyebrow:"Market intelligence pour le B2B européen",
-  h_title:"Les chiffres de votre marché, <span class='hl'>même là où personne ne les a mesurés.</span>",
+  n_contact:"Nous contacter",
+  h_eyebrow:"Market intelligence · tous secteurs, tous pays",
+  h_title:"Les chiffres de votre marché, <em>même là où personne ne les a mesurés.</em>",
   h_lead:"Perceptra reconstitue la valeur du marché de votre produit dans votre zone, les acteurs qui l'occupent et votre part. Avec une méthodologie propriétaire qui choisit les sources et les modèles d'estimation, et la preuve de chaque chiffre.",
-  h_cta1:"Créer votre compte",
+  h_cta1:"Parlez-nous de votre marché",
   h_cta2:"Notre méthode",
-  h_note:"Service géré de bout en bout · Chaque chiffre avec <b>source et notation</b>",
+  h_engines:"Deux moteurs",
+  e1:"Market Intelligence",
+  e2:"Audiences synthétiques",
   c_title:"Exemple · Étude de marché",
   c_live:"Triangulation",
-  c_q:"<span class='mono'>Q&nbsp;·&nbsp;</span>Emballages en carton ondulé · Lombardie · 2026",
-  p_eyebrow:"Le problème",
-  p_title:"Les chiffres de votre marché ne sont pas à vendre.<br>Il faut les reconstituer.",
-  p_p1:"Les études sectorielles coûtent des milliers d'euros, couvrent des pays entiers, datent de plusieurs années et parlent rarement de votre produit dans votre zone. Les cabinets de conseil y parviennent, mais en plusieurs mois et avec des budgets de grand groupe.",
-  p_p2:"Pendant ce temps, les questions restent ouvertes : combien vaut mon marché dans cette région ? Qui sont mes concurrents ? Quelle est ma part ? Où croître l'an prochain ? La donnée nécessaire n'existe presque jamais toute prête.",
-  p_p3:"<b>Perceptra la reconstitue.</b> Nous croisons statistiques officielles, commerce extérieur, registres d'entreprises, comptes annuels et sources web, et nous estimons les chiffres manquants avec des modèles explicites. Chaque résultat est livré avec ses hypothèses, sa méthode et son niveau de fiabilité.",
-  p_c1_k:"La différence",
-  p_c1_t:"L'IA est un outil interchangeable. La méthode avec laquelle nous la pilotons ne l'est pas : c'est notre avantage, et il progresse à chaque étude.",
-  p_c2_k:"Le format",
-  p_c2_t:"Un service géré, pas un outil de plus. Vous apportez une question business ; nous livrons un rapport prêt pour la décision.",
-  m_eyebrow:"La méthode",
-  m_title:"La méthode Perceptra. C'est là notre avantage.",
-  m_lead:"Quand la donnée n'existe pas, le résultat dépend de la façon dont on la reconstitue. Notre modèle décide quelles approches d'estimation utiliser, où chercher les données et comment les croiser. Ce savoir-faire s'accumule d'étude en étude.",
-  s1n:"PHASE 01",
-  s1t:"Cadrage",
-  s1p:"Nous traduisons votre question en produit, nomenclatures statistiques, zone géographique et horizon temporel.",
-  s2n:"PHASE 02",
-  s2t:"Sources et modèles",
-  s2p:"Le modèle Perceptra choisit les sources (statistiques officielles, commerce extérieur, registres, comptes annuels, web) et les méthodes d'estimation adaptées au cas.",
-  s3n:"PHASE 03",
-  s3t:"Reconstitution et triangulation",
-  s3p:"Nous estimons le même chiffre par des approches indépendantes et les comparons. Les hypothèses sont écrites, jamais implicites.",
-  s4n:"PHASE 04",
-  s4t:"Rapport décisionnel",
-  s4p:"Résultats, hypothèses, méthode et niveau de confiance, avec une lecture qui vous aide à décider. Pas un tableau de bord à interpréter.",
-  v_eyebrow:"Notre raison d'être",
-  v_title:"Vision, mission et les principes auxquels nous ne dérogeons pas.",
-  vis_k:"Vision",
-  vis_t:"Que chaque entreprise européenne décide en connaissant son marché.",
-  vis_p:"Aujourd'hui, des chiffres de marché fiables sont le privilège de ceux qui peuvent payer des mois de conseil. Nous voulons les rendre rapides et accessibles aux PME, aux startups et aux cabinets, et être le premier nom auquel ils pensent en Europe.",
-  mis_k:"Mission",
-  mis_t:"Reconstituer avec méthode les données de marché qui n'existent pas toutes prêtes.",
-  mis_p:"Nous réunissons sources publiques et privées, modèles d'estimation et intelligence artificielle sous une méthodologie propriétaire, pour livrer des chiffres défendables dans des délais et des budgets adaptés aux entreprises réelles.",
-  v1t:"La méthode avant le modèle",
-  v1p:"Les modèles d'IA changent chaque année. Notre avantage, c'est la méthode qui les pilote : quelles sources, quelles estimations, quelles vérifications.",
-  v2t:"Aucun chiffre orphelin",
-  v2p:"Chaque chiffre remonte à sa source par des calculs et des preuves documentés. Si nous ne pouvons pas le démontrer, nous ne le livrons pas.",
-  v3t:"Hypothèses déclarées",
-  v3p:"Nous distinguons toujours ce qui est mesuré de ce qui est estimé, et avec quelle confiance. Pas de boîte noire présentée comme une certitude.",
-  v4t:"Une rigueur accessible",
-  v4p:"La qualité de l'analyse ne doit pas dépendre de la taille du budget. Nous construisons pour ceux qui devaient jusqu'ici choisir entre décider à l'aveugle et ne pas décider.",
-  t_eyebrow:"Qui sommes-nous",
-  t_title:"Quatre fondateurs, une obsession : des chiffres dignes de confiance.",
-  t_lead:"Produit, technologie, revenue et marketing sous le même toit dès le premier jour. Aucun département externalisé, aucune expertise de façade.",
-  b1:"Conçoit le produit, la stratégie et la méthodologie de Market Intelligence. Parcours en finance institutionnelle et en system design : la discipline de la mesure appliquée aux marchés.",
-  b2:"Dirige la technologie de Perceptra : architecture de la plateforme, audiences synthétiques et calibration des modèles.",
-  b3:"Porte Perceptra sur le marché. Expérience commerciale de terrain en B2B : il connaît les questions que les clients posent vraiment, pas celles des pitch decks.",
-  b4:"Construit la marque et la demande. Le marketing comme transfert de confiance : la transparence que nous exigeons de nos données, appliquée à notre communication.",
-  pos_eyebrow:"Positionnement",
-  pos_title:"Plus précis qu'une étude sectorielle. Plus rapide et plus accessible qu'un cabinet de conseil.",
-  pos_p:"Pour les PME et startups B2B, fabricants et distributeurs, agences marketing, experts-comptables et cabinets de conseil : tous ceux qui ont besoin des vrais chiffres de leur marché sans budget de grand groupe.",
-  pos_cta:"Parlons-en",
-  ct_eyebrow:"Commencez ici",
-  ct_title:"Donnez-nous votre marché. Nous le mesurons.",
-  ct_lead:"Une étude pilote sur votre produit et votre zone : même méthode, sources déclarées, une notation sur chaque chiffre. Voyez le résultat avant de décider.",
-  ct_b1:"Demander une démo",
-  ct_b2:"Proposer une étude pilote",
-  f_desc:"Market intelligence pour les entreprises européennes : les chiffres de votre marché, reconstitués avec méthode, chacun avec sa source et sa notation.",
-  f_nav_h:"Navigation",
-  f_contact_h:"Contact",
-  f_copy:"© 2026 Perceptra. Tous droits réservés.",
-  n_servizi:"Nos services",
-  n_aff:"Fiabilité",
-  c_axis:"Valeur du marché, M€",
+  c_q:"Emballages en carton ondulé · Lombardie · 2026",
   c_m1:"<b>Top-down</b>production + import − export",
   c_m2:"<b>Bottom-up</b>acteurs recensés",
   c_m3:"<b>Demande</b>secteurs en aval",
   c_m4:"<b>Estimation Perceptra</b>intervalle de confiance",
+  c_axis:"Valeur du marché, M€",
   c_val:"Estimation centrale",
   c_rng:"Intervalle",
   c_rat:"Notation",
   c_v1:"412 M€",
   c_v2:"± 4 %",
+  c_note:"Données illustratives",
+  c_sum:"Exemple illustratif : trois estimations indépendantes (top-down, bottom-up et demande) convergent vers un marché d'environ 412 M€, avec un intervalle de ± 4 % et une notation AB.",
+  pf1_k:"Source et notation",
+  pf1_t:"Chaque chiffre remonte à sa source et porte une notation à deux lettres, de A à E.",
+  pf2_k:"Triangulation",
+  pf2_t:"Nous estimons le même chiffre par des approches indépendantes et les comparons.",
+  pf3_k:"Hypothèses déclarées",
+  pf3_t:"Nous distinguons toujours ce qui est mesuré de ce qui est estimé, et avec quelle confiance.",
+  p_eyebrow:"Le problème",
+  p_title:"Les chiffres de votre marché ne sont pas à vendre. <em>Il faut les reconstituer.</em>",
+  p_q_k:"Les questions qui restent ouvertes",
+  q1:"Combien vaut mon marché dans cette région ?",
+  q2:"Qui sont mes concurrents ?",
+  q3:"Quelle est ma part ?",
+  q4:"Où croître l'an prochain ?",
+  p_lead:"La donnée nécessaire n'existe presque jamais toute prête.",
+  cmp1_k:"Études sectorielles",
+  cmp1_t:"Elles coûtent des milliers d'euros, couvrent des pays entiers, datent de plusieurs années et parlent rarement de votre produit dans votre zone.",
+  cmp2_k:"Cabinets de conseil",
+  cmp2_t:"Ils y parviennent, mais en plusieurs mois et avec des budgets de grand groupe.",
+  cmp3_t:"La reconstitue. Nous croisons statistiques officielles, commerce extérieur, registres d'entreprises, comptes annuels et sources web, et nous estimons les chiffres manquants avec des modèles explicites.",
+  m_eyebrow:"La méthode",
+  m_title:"La méthode Perceptra. <em>C'est là notre avantage.</em>",
+  m_lead:"Quand la donnée n'existe pas, le résultat dépend de la façon dont on la reconstitue. Notre modèle décide quelles approches d'estimation utiliser, où chercher les données et comment les croiser. Ce savoir-faire s'accumule d'étude en étude.",
+  m_q_k:"La différence",
+  m_q:"L'IA est un outil interchangeable. La méthode avec laquelle nous la pilotons ne l'est pas : c'est notre avantage, et il progresse à chaque étude.",
+  s1n:"Phase 01",
+  s1t:"Cadrage",
+  s1p:"Nous traduisons votre question en produit, nomenclatures statistiques, zone géographique et horizon temporel.",
+  s2n:"Phase 02",
+  s2t:"Sources et modèles",
+  s2p:"Le modèle Perceptra choisit les sources (statistiques officielles, commerce extérieur, registres, comptes annuels, web) et les méthodes d'estimation adaptées au cas.",
+  s3n:"Phase 03",
+  s3t:"Reconstitution et triangulation",
+  s3p:"Nous estimons le même chiffre par des approches indépendantes et les comparons. Les hypothèses sont écrites, jamais implicites.",
+  s4n:"Phase 04",
+  s4t:"Rapport décisionnel",
+  s4p:"Résultats, hypothèses, méthode et niveau de confiance, avec une lecture qui vous aide à décider. Pas un tableau de bord à interpréter.",
+  a_eyebrow:"Fiabilité",
+  a_title:"Chaque chiffre a sa preuve. <em>Chaque preuve a sa note.</em>",
+  a_lead:"Dans nos rapports, aucun chiffre n'est orphelin : vous remontez du résultat au calcul, du calcul à la preuve, de la preuve à la source. Et chaque donnée porte une notation à deux lettres : fiabilité de la source et qualité de la donnée.",
+  ch1_k:"Rapport",
+  ch1_t:"Marché 2026 : 412 M€<span>estimation centrale, intervalle ± 4 %</span>",
+  ch2_k:"Résultat",
+  ch2_t:"Consommation apparente régionale<span>part de la Lombardie dans le chiffre national</span>",
+  ch3_k:"Calcul",
+  ch3_t:"Production + import − export<span>réparti selon l'emploi des secteurs utilisateurs</span>",
+  ch4_k:"Preuve",
+  ch4_t:"Valeur de la production nationale<span>série annuelle, dernière année disponible</span>",
+  ch5_k:"Source",
+  ch5_t:"Institut statistique officiel<span>fiabilité de la source : classe A</span>",
+  a_label:"Notation de la donnée · exemple",
+  a_src:"Fiabilité de la source",
+  a_qual:"Qualité de la donnée",
+  a_desc:"Première lettre : fiabilité de la source. Seconde lettre : qualité de la donnée. De A à E, indiquée sur chaque chiffre.",
+  a_shcs:"Audiences synthétiques : SHCS ≥ 0,80. En dessous du seuil, l'étude n'est pas livrée.",
   sv_eyebrow:"Nos services",
-  sv_title:"Deux moteurs, une seule exigence de rigueur.",
+  sv_title:"Deux moteurs, <em>une seule exigence de rigueur.</em>",
   sv_lead:"La Market Intelligence mesure le marché. Les audiences synthétiques anticipent ses réactions. Seules ou ensemble, dans la même étude.",
   sv1_k:"Service principal",
   sv1_t:"Market Intelligence",
@@ -968,79 +1245,173 @@ fr:{
   sv2_l1:"Tests de concept, de message, de packaging et de prix",
   sv2_l2:"Calibration sur un panel humain de contrôle",
   sv2_l3:"Score SHCS sur chaque étude",
-  a_eyebrow:"Fiabilité",
-  a_title:"Chaque chiffre a sa preuve. Chaque preuve a sa note.",
-  a_lead:"Dans nos rapports, aucun chiffre n'est orphelin : vous remontez du résultat au calcul, du calcul à la preuve, de la preuve à la source. Et chaque donnée porte une notation à deux lettres : fiabilité de la source et qualité de la donnée.",
-  ch1_k:"Rapport",
-  ch1_t:"Marché 2026 : 412 M€<span>estimation centrale, intervalle ± 4 %</span>",
-  ch2_k:"Résultat",
-  ch2_t:"Consommation apparente régionale<span>part de la Lombardie dans le chiffre national</span>",
-  ch3_k:"Calcul",
-  ch3_t:"Production + import − export<span>réparti selon l'emploi des secteurs utilisateurs</span>",
-  ch4_k:"Preuve",
-  ch4_t:"Valeur de la production nationale<span>série annuelle, dernière année disponible</span>",
-  ch5_k:"Source",
-  ch5_t:"Institut statistique officiel<span>fiabilité de la source : classe A</span>",
-  a_label:"Notation de la donnée · exemple",
-  a_desc:"Première lettre : fiabilité de la source. Seconde lettre : qualité de la donnée. De A à E, indiquée sur chaque chiffre.",
-  a_shcs:"AUDIENCES SYNTHÉTIQUES : SHCS ≥ 0,80 — en dessous du seuil, l'étude n'est pas livrée.",
+  fmt_k:"Le format",
+  fmt_t:"Un service géré, pas un outil de plus. Vous apportez une question business ; nous livrons un rapport prêt pour la décision.",
+  pos_eyebrow:"Pour qui",
+  pos_title:"Plus précis qu'une étude sectorielle. Plus rapide et plus accessible qu'un cabinet de conseil.",
+  pos_p:"Pour tous ceux qui ont besoin des vrais chiffres de leur marché sans budget de grand groupe.",
+  au1:"PME et startups B2B",
+  au2:"Fabricants et distributeurs",
+  au3:"Agences marketing",
+  au4:"Experts-comptables",
+  au5:"Cabinets de conseil",
+  pos_cta:"Parlons-en",
+  v_eyebrow:"Notre raison d'être",
+  v_title:"Vision, mission et les principes auxquels nous ne dérogeons pas.",
+  vis_k:"Vision",
+  vis_t:"Que chaque entreprise européenne décide en connaissant son marché.",
+  vis_p:"Aujourd'hui, des chiffres de marché fiables sont le privilège de ceux qui peuvent payer des mois de conseil. Nous voulons les rendre rapides et accessibles aux PME, aux startups et aux cabinets, et être le premier nom auquel ils pensent en Europe.",
+  mis_k:"Mission",
+  mis_t:"Reconstituer avec méthode les données de marché qui n'existent pas toutes prêtes.",
+  mis_p:"Nous réunissons sources publiques et privées, modèles d'estimation et intelligence artificielle sous une méthodologie propriétaire, pour livrer des chiffres défendables dans des délais et des budgets adaptés aux entreprises réelles.",
+  pr_k:"Principes",
+  v1t:"La méthode avant le modèle",
+  v1p:"Les modèles d'IA changent chaque année. Notre avantage, c'est la méthode qui les pilote : quelles sources, quelles estimations, quelles vérifications.",
+  v2t:"Aucun chiffre orphelin",
+  v2p:"Chaque chiffre remonte à sa source par des calculs et des preuves documentés. Si nous ne pouvons pas le démontrer, nous ne le livrons pas.",
+  v3t:"Hypothèses déclarées",
+  v3p:"Nous distinguons toujours ce qui est mesuré de ce qui est estimé, et avec quelle confiance. Pas de boîte noire présentée comme une certitude.",
+  v4t:"Une rigueur accessible",
+  v4p:"La qualité de l'analyse ne doit pas dépendre de la taille du budget. Nous construisons pour ceux qui devaient jusqu'ici choisir entre décider à l'aveugle et ne pas décider.",
+  t_eyebrow:"Qui sommes-nous",
+  t_title:"Quatre fondateurs, une obsession : <em>des chiffres dignes de confiance.</em>",
+  t_lead:"Produit, technologie, revenue et marketing sous le même toit dès le premier jour. Aucun département externalisé, aucune expertise de façade.",
+  b1:"Conçoit le produit, la stratégie et la méthodologie de Market Intelligence. Parcours en finance institutionnelle et en system design : la discipline de la mesure appliquée aux marchés.",
+  b2:"Dirige la technologie de Perceptra : architecture de la plateforme, audiences synthétiques et calibration des modèles.",
+  b3:"Porte Perceptra sur le marché. Expérience commerciale de terrain en B2B : il connaît les questions que les clients posent vraiment, pas celles des pitch decks.",
+  b4:"Construit la marque et la demande. Le marketing comme transfert de confiance : la transparence que nous exigeons de nos données, appliquée à notre communication.",
+  faq_eyebrow:"Questions fréquentes",
+  faq_title:"Les réponses courtes.",
+  faq1_q:"Que fait Perceptra ?",
+  faq1_a:"Elle reconstitue les chiffres d'un marché : taille par produit et par zone géographique, parts de marché, acteurs et prévisions. Quand les données ne sont pas directement disponibles, elle les estime en croisant plusieurs sources et méthodes.",
+  faq2_q:"Comment estimez-vous un marché si les données n'existent pas ?",
+  faq2_a:"Avec une méthodologie propriétaire : nous choisissons les sources (statistiques officielles, commerce extérieur, registres d'entreprises, comptes annuels, web) et plusieurs approches d'estimation indépendantes, puis nous les comparons. Les hypothèses et la méthode sont toujours indiquées dans le rapport.",
+  faq3_q:"Qu'est-ce que la notation de fiabilité ?",
+  faq3_a:"Chaque donnée porte deux lettres de A à E : la première indique la fiabilité de la source, la seconde la qualité de la donnée. Chaque chiffre du rapport peut être rattaché au calcul, à la preuve et à la source dont il provient.",
+  faq4_q:"Que sont les audiences synthétiques ?",
+  faq4_a:"Des focus groups simulés avec des audiences synthétiques calibrées sur un panel humain de contrôle, pour tester concepts, messages, packaging et prix avant le lancement. Chaque étude indique son SHCS et n'est pas livrée en dessous de 0,80.",
+  faq5_q:"À qui s'adresse Perceptra ?",
+  faq5_a:"Aux PME et startups B2B, fabricants et distributeurs, agences marketing, experts-comptables et cabinets de conseil qui ont besoin des vrais chiffres de leur marché sans budget de grand groupe.",
+  ct_eyebrow:"Commencez ici",
+  ct_title:"Donnez-nous votre marché. <em>Nous le mesurons.</em>",
+  ct_lead:"Une étude pilote sur votre produit et votre zone : même méthode, sources déclarées, une notation sur chaque chiffre. Voyez le résultat avant de décider.",
+  ct_b1:"Nous écrire",
+  ct_b2:"Proposer une étude pilote",
+  ct_mail:"Ou écrivez directement à",
+  f_desc:"Market intelligence : les chiffres de votre marché, reconstitués avec méthode, chacun avec sa source et sa notation.",
+  f_nav_h:"Navigation",
+  f_contact_h:"Contact",
+  f_lang_h:"Langue",
+  f_copy:"© 2026 Perceptra",
   f_line:"Market Intelligence · Audiences synthétiques"
 }
 };
 
-function setLang(l){
-  const d = I18N[l] || I18N.en;
-  document.documentElement.lang = l;
-  document.title = d._title;
-  const md=document.getElementById('meta-desc'); if(md) md.setAttribute('content', d._desc);
-  document.querySelectorAll('[data-i18n]').forEach(el=>{
-    const k=el.getAttribute('data-i18n');
-    if(d[k]!==undefined) el.innerHTML=d[k];
-  });
-  const appLang = l==='fr' ? 'fr' : 'en';
-  document.querySelectorAll('a[data-app]').forEach(a=>{
-    a.href = 'https://app.perceptra.eu/'+a.dataset.app+'?lang='+appLang
-      +'&utm_source=perceptra.eu&utm_medium=site&utm_campaign='+(a.dataset.utm||'site');
-  });
-  document.querySelectorAll('.lang button').forEach(b=>{
-    b.classList.toggle('active', b.dataset.lang===l);
-    b.setAttribute('aria-pressed', b.dataset.lang===l ? 'true':'false');
-  });
-}
-
-/* Auto-detect from device/browser language: it→IT, fr→FR, else EN */
+/* Raw-file preview only (opening index.html directly): render from the browser language. */
 (function(){
-  const pref=(navigator.languages && navigator.languages[0]) || navigator.language || 'en';
-  const p=pref.toLowerCase();
-  const l = p.startsWith('it') ? 'it' : p.startsWith('fr') ? 'fr' : 'en';
-  setLang(l);
-  document.querySelectorAll('.lang button').forEach(b=>{
-    b.addEventListener('click',()=>setLang(b.dataset.lang));
+  function setLang(l){
+    var dict = I18N[l] || I18N.it;
+    document.documentElement.lang = l;
+    document.title = dict._title;
+    document.querySelectorAll('[data-i18n]').forEach(function(el){
+      var k = el.getAttribute('data-i18n'); if (dict[k] !== undefined) el.innerHTML = dict[k];
+    });
+    document.querySelectorAll('[data-i18n-aria]').forEach(function(el){
+      var k = el.getAttribute('data-i18n-aria'); if (dict[k] !== undefined) el.setAttribute('aria-label', dict[k]);
+    });
+    document.querySelectorAll('[data-lang]').forEach(function(a){
+      if (a.getAttribute('data-lang') === l) a.setAttribute('aria-current', 'true'); else a.removeAttribute('aria-current');
+    });
+  }
+  var p = ((navigator.languages && navigator.languages[0]) || navigator.language || 'it').toLowerCase();
+  setLang(p.indexOf('fr') === 0 ? 'fr' : p.indexOf('en') === 0 ? 'en' : 'it');
+  document.addEventListener('click', function(e){
+    var a = e.target.closest('[data-lang]');
+    if (a) { e.preventDefault(); setLang(a.getAttribute('data-lang')); }
   });
 })();
+</script>
 
+<script>
 /* ================= INTERACTIONS ================= */
 (function(){
-  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var d = document, root = d.documentElement;
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var hasIO = 'IntersectionObserver' in window;
+
+  /* theme: system by default, explicit choice remembered */
+  var KEY = 'perceptra-theme';
+  var darkMQ = window.matchMedia('(prefers-color-scheme: dark)');
+  function effectiveTheme(){ return root.getAttribute('data-theme') || (darkMQ.matches ? 'dark' : 'light'); }
+  function syncTheme(){
+    var dark = effectiveTheme() === 'dark';
+    d.querySelectorAll('[data-theme-toggle]').forEach(function(b){ b.setAttribute('aria-pressed', dark ? 'true' : 'false'); });
+  }
+  d.querySelectorAll('[data-theme-toggle]').forEach(function(b){
+    b.addEventListener('click', function(){
+      var next = effectiveTheme() === 'dark' ? 'light' : 'dark';
+      root.setAttribute('data-theme', next);
+      try { localStorage.setItem(KEY, next); } catch(e) {}
+      syncTheme();
+    });
+  });
+  if (darkMQ.addEventListener) darkMQ.addEventListener('change', syncTheme);
+  syncTheme();
+
+  /* mobile menu */
+  var menuBtn = d.querySelector('.menu-btn'), panel = d.getElementById('menu');
+  function setMenu(open){
+    menuBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+    panel.hidden = !open;
+    root.classList.toggle('menu-open', open);
+  }
+  menuBtn.addEventListener('click', function(){ setMenu(menuBtn.getAttribute('aria-expanded') !== 'true'); });
+  panel.addEventListener('click', function(e){ if (e.target.closest('a')) setMenu(false); });
+  d.addEventListener('keydown', function(e){
+    if (e.key === 'Escape' && menuBtn.getAttribute('aria-expanded') === 'true') { setMenu(false); menuBtn.focus(); }
+  });
+  var wide = window.matchMedia('(min-width: 1101px)');
+  if (wide.addEventListener) wide.addEventListener('change', function(e){ if (e.matches) setMenu(false); });
+
+  /* header hairline once the page scrolls */
+  var header = d.querySelector('.site-header');
+  function onScroll(){ header.classList.toggle('scrolled', window.scrollY > 8); }
+  window.addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
 
   /* scroll reveal */
-  const io = new IntersectionObserver(es=>{
-    es.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target);} });
-  },{threshold:.15});
-  document.querySelectorAll('.rv').forEach(el=>io.observe(el));
+  var rv = d.querySelectorAll('.rv');
+  if (!hasIO || reduce) { rv.forEach(function(el){ el.classList.add('in'); }); }
+  else {
+    var io = new IntersectionObserver(function(entries){
+      entries.forEach(function(e){ if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
+    }, { threshold: 0.08 });
+    rv.forEach(function(el){ io.observe(el); });
+  }
 
   /* hero: three independent estimates converge, then the result appears */
-  const con = document.getElementById('console');
-  const tri = document.getElementById('tri');
-  function runTri(){
-    if(reduce){ tri.classList.add('go'); con.classList.add('done'); return; }
-    tri.classList.remove('go'); con.classList.remove('done');
-    void tri.offsetWidth;
-    tri.classList.add('go');
-    setTimeout(()=>con.classList.add('done'), 2900);
-    setTimeout(runTri, 11000);
+  var ins = d.getElementById('instrument'), tri = d.getElementById('tri');
+  function runTri(){ tri.classList.add('go'); setTimeout(function(){ ins.classList.add('done'); }, reduce ? 0 : 2500); }
+  if (!hasIO || reduce) runTri();
+  else {
+    var io2 = new IntersectionObserver(function(entries){
+      if (entries[0].isIntersecting) { runTri(); io2.disconnect(); }
+    }, { threshold: 0.3 });
+    io2.observe(ins);
   }
-  runTri();
+
+  /* highlight the section being read in the top navigation */
+  if (hasIO) {
+    var links = {};
+    d.querySelectorAll('.primary-nav a[href^="#"]').forEach(function(a){ links[a.getAttribute('href').slice(1)] = a; });
+    var spy = new IntersectionObserver(function(entries){
+      entries.forEach(function(e){
+        var a = links[e.target.id];
+        if (a) a.classList.toggle('is-active', e.isIntersecting);
+      });
+    }, { rootMargin: '-45% 0px -50% 0px' });
+    Object.keys(links).forEach(function(id){ var s = d.getElementById(id); if (s) spy.observe(s); });
+  }
 })();
 </script>
 </body>
