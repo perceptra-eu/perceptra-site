@@ -1,170 +1,158 @@
-import { readFileSync, writeFileSync } from 'node:fs';
+/*
+ * Static build for perceptra.eu (run by Vercel: `npm run build`).
+ *
+ * index.html is the single source: markup with data-i18n keys plus the I18N dictionary.
+ * For each language this script writes a pre-rendered page (/, /en, /fr) with its own
+ * head (canonical, hreflang, Open Graph, JSON-LD), real text instead of empty tags, the
+ * dictionary removed and app links tagged with language and UTM. It also writes
+ * sitemap.xml, robots.txt and llms.txt, and copies brand assets and root files.
+ *
+ * The build fails if a key used in the markup is missing in any language.
+ */
+import { readFileSync, writeFileSync, readdirSync, copyFileSync, cpSync, statSync } from 'node:fs';
 
 const ORIGIN = 'https://perceptra.eu';
+const APP = 'https://app.perceptra.eu';
+const LANGS = ['it', 'en', 'fr'];
 const src = readFileSync('index.html', 'utf8');
 
-/* pull the translation dictionary out of the inline script */
-const dictStart = src.indexOf('const I18N = ') + 'const I18N = '.length;
-const dictEnd = src.indexOf('\nfunction setLang');
-const dictSrc = src.slice(dictStart, dictEnd).trim().replace(/;$/, '');
-const I18N = new Function('return ' + dictSrc)();
+/* ---------- dictionary ---------- */
+const I18N_BLOCK = /\n?<script id="i18n">[\s\S]*?<\/script>\n?/;
+function readDict(html) {
+  const start = html.indexOf('const I18N = ');
+  if (start < 0) throw new Error('I18N dictionary not found in index.html');
+  const from = start + 'const I18N = '.length;
+  const end = html.indexOf('\n};', from) + 2;
+  return new Function('return ' + html.slice(from, end))();
+}
+const I18N = readDict(src);
 
+/* ---------- validation: every key used in the markup exists in every language ---------- */
+const used = new Set([...src.matchAll(/data-i18n(?:-aria)?="([^"]+)"/g)].map(m => m[1]));
+const errors = [];
+for (const code of LANGS) {
+  if (!I18N[code]) { errors.push(`language "${code}" missing`); continue; }
+  for (const key of used) if (I18N[code][key] === undefined) errors.push(`${code}.${key} missing`);
+}
+for (const code of LANGS.slice(1)) {
+  const extra = Object.keys(I18N[code] || {}).filter(k => I18N.it[k] === undefined);
+  if (extra.length) errors.push(`${code} has keys not in it: ${extra.join(', ')}`);
+}
+if (errors.length) {
+  console.error('i18n check failed:\n  ' + errors.join('\n  '));
+  process.exit(1);
+}
+
+/* ---------- per-language metadata ---------- */
 const META = {
   it: {
     lang: 'it-IT',
     path: '/',
     file: 'index.html',
-    title: 'Perceptra \u2014 Market intelligence per PMI e B2B: dimensione del mercato, quote e concorrenti',
-    desc: 'Perceptra ricostruisce i numeri del tuo mercato: dimensioni per prodotto e area, quote, operatori e previsioni. Metodologia proprietaria, ogni numero con fonte e rating di affidabilit\u00e0.'
+    title: 'Perceptra — Market intelligence: dimensione del mercato e quote',
+    desc: 'Ricostruiamo i numeri del tuo mercato: dimensione per prodotto e area, quote, operatori e previsioni. Metodo proprietario, fonte e rating su ogni numero.'
   },
   en: {
     lang: 'en',
     path: '/en',
     file: 'en.html',
-    title: 'Perceptra \u2014 Market intelligence for SMEs and B2B: market size, shares and competitors',
-    desc: 'Perceptra rebuilds the numbers of your market: size by product and area, market shares, operators and forecasts. Proprietary methodology, every figure with its source and reliability rating.'
+    title: 'Perceptra — Market intelligence: market size and market share',
+    desc: 'We rebuild the numbers of your market: size by product and area, shares, operators and forecasts. Proprietary method, source and rating on every figure.'
   },
   fr: {
     lang: 'fr',
     path: '/fr',
     file: 'fr.html',
-    title: 'Perceptra \u2014 Market intelligence pour PME et B2B : taille du march\u00e9, parts et concurrents',
-    desc: 'Perceptra reconstitue les chiffres de votre march\u00e9 : taille par produit et par zone, parts de march\u00e9, acteurs et pr\u00e9visions. M\u00e9thodologie propri\u00e9taire, chaque chiffre avec sa source et sa notation de fiabilit\u00e9.'
+    title: 'Perceptra — Market intelligence : taille et parts de marché',
+    desc: 'Nous reconstituons les chiffres de votre marché : taille, parts, acteurs et prévisions. Méthode propriétaire, source et notation sur chaque chiffre.'
   }
 };
+for (const [code, m] of Object.entries(META)) {
+  if (m.title.length > 65) console.warn(`warning: ${code} title is ${m.title.length} chars (search engines show ~60)`);
+  if (m.desc.length > 165) console.warn(`warning: ${code} description is ${m.desc.length} chars (search engines show ~160)`);
+}
 
-const organization = {
-  '@context': 'https://schema.org',
-  '@type': 'Organization',
-  '@id': ORIGIN + '/#organization',
-  name: 'Perceptra',
-  url: ORIGIN,
-  email: 'hello@perceptra.eu',
-  description: 'Societ\u00e0 di market intelligence che ricostruisce dimensioni, quote e operatori dei mercati B2B con una metodologia proprietaria; conduce anche studi con audience sintetiche calibrate su panel umani.',
-  slogan: 'I numeri del tuo mercato, anche dove nessuno li ha misurati.',
-  logo: ORIGIN + '/brand/icon-512.png',
-  image: ORIGIN + '/og.png',
-  areaServed: [
-    { '@type': 'Country', name: 'Italy' },
-    { '@type': 'Country', name: 'France' },
-    { '@type': 'Place', name: 'European Union' }
-  ],
-  knowsLanguage: ['it', 'en', 'fr'],
-  contactPoint: [{
-    '@type': 'ContactPoint',
-    contactType: 'sales',
-    email: 'hello@perceptra.eu',
-    availableLanguage: ['Italian', 'English', 'French']
-  }]
-};
+const stripTags = s => s.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+const escAttr = s => String(s).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
 
+/* ---------- structured data ---------- */
 const AREAS = [
   { '@type': 'Country', name: 'Italy' },
   { '@type': 'Country', name: 'France' },
   { '@type': 'Place', name: 'European Union' }
 ];
 
-const service = {
-  '@context': 'https://schema.org',
-  '@type': 'Service',
-  '@id': ORIGIN + '/#market-intelligence',
-  name: 'Market Intelligence',
-  serviceType: 'Ricerca di mercato quantitativa e market sizing',
-  provider: { '@id': ORIGIN + '/#organization' },
-  areaServed: AREAS,
-  audience: {
-    '@type': 'BusinessAudience',
-    audienceType: 'PMI e startup B2B, produttori e distributori, agenzie di marketing, commercialisti e società di consulenza'
-  },
-  description: 'Dimensione del mercato per prodotto e area geografica, quote di mercato, mappa degli operatori e stime previsionali. I dati mancanti sono ricostruiti con una metodologia proprietaria; ogni numero riporta fonte, ipotesi e rating di affidabilità.',
-  offers: {
-    '@type': 'Offer',
-    priceCurrency: 'EUR',
-    availability: 'https://schema.org/InStock',
-    url: ORIGIN
-  }
-};
-
-const serviceAudiences = {
-  '@context': 'https://schema.org',
-  '@type': 'Service',
-  '@id': ORIGIN + '/#synthetic-audiences',
-  name: 'Audience sintetiche',
-  serviceType: 'Ricerca di mercato qualitativa',
-  provider: { '@id': ORIGIN + '/#organization' },
-  areaServed: AREAS,
-  audience: {
-    '@type': 'BusinessAudience',
-    audienceType: 'Brand e agenzie nel settore dei beni di consumo'
-  },
-  description: 'Focus group simulati con audience sintetiche calibrate su un panel umano di controllo, per concept, claim, packaging e pricing test. Ogni studio riporta lo SHCS e non viene consegnato sotto 0,80.'
-};
-
-const website = {
-  '@context': 'https://schema.org',
-  '@type': 'WebSite',
-  '@id': ORIGIN + '/#website',
-  url: ORIGIN,
-  name: 'Perceptra',
-  publisher: { '@id': ORIGIN + '/#organization' },
-  inLanguage: ['it', 'en', 'fr']
-};
-
-const faq = {
-  '@context': 'https://schema.org',
-  '@type': 'FAQPage',
-  mainEntity: [
-    {
+function jsonLd(code) {
+  const d = I18N[code];
+  const organization = {
+    '@context': 'https://schema.org',
+    '@type': 'Organization',
+    '@id': ORIGIN + '/#organization',
+    name: 'Perceptra',
+    url: ORIGIN,
+    email: 'hello@perceptra.eu',
+    description: stripTags(d.f_desc),
+    slogan: stripTags(d.h_title),
+    logo: ORIGIN + '/brand/icon-512.png',
+    image: ORIGIN + '/og.png',
+    areaServed: AREAS,
+    knowsLanguage: LANGS,
+    contactPoint: [{
+      '@type': 'ContactPoint',
+      contactType: 'customer support',
+      email: 'hello@perceptra.eu',
+      availableLanguage: ['Italian', 'English', 'French']
+    }]
+  };
+  const website = {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    '@id': ORIGIN + '/#website',
+    url: ORIGIN,
+    name: 'Perceptra',
+    publisher: { '@id': ORIGIN + '/#organization' },
+    inLanguage: LANGS
+  };
+  const mi = {
+    '@context': 'https://schema.org',
+    '@type': 'Service',
+    '@id': ORIGIN + '/#market-intelligence',
+    name: stripTags(d.sv1_t),
+    serviceType: 'Market research and market sizing',
+    provider: { '@id': ORIGIN + '/#organization' },
+    areaServed: AREAS,
+    description: stripTags(d.sv1_p)
+  };
+  const audiences = {
+    '@context': 'https://schema.org',
+    '@type': 'Service',
+    '@id': ORIGIN + '/#synthetic-audiences',
+    name: stripTags(d.sv2_t),
+    serviceType: 'Qualitative market research',
+    provider: { '@id': ORIGIN + '/#organization' },
+    areaServed: AREAS,
+    description: stripTags(d.sv2_p)
+  };
+  /* FAQ mirrors the visible FAQ section of the same language */
+  const faq = {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    inLanguage: META[code].lang,
+    mainEntity: [1, 2, 3, 4, 5].map(i => ({
       '@type': 'Question',
-      name: "Che cosa fa Perceptra?",
-      acceptedAnswer: {
-        '@type': 'Answer',
-        text: "Ricostruisce i numeri di un mercato B2B: dimensione per prodotto e area geografica, quote di mercato, operatori e previsioni. Quando i dati non sono disponibili direttamente, li stima incrociando pi\u00f9 fonti e metodi."
-      }
-    },
-    {
-      '@type': 'Question',
-      name: "Come stimate un mercato se i dati non esistono?",
-      acceptedAnswer: {
-        '@type': 'Answer',
-        text: "Con una metodologia proprietaria: scegliamo le fonti (statistiche ufficiali, commercio estero, registri delle imprese, bilanci, web) e pi\u00f9 approcci di stima indipendenti, poi li confrontiamo. Ipotesi e metodo sono sempre dichiarati nel report."
-      }
-    },
-    {
-      '@type': 'Question',
-      name: "Che cos'\u00e8 il rating di affidabilit\u00e0?",
-      acceptedAnswer: {
-        '@type': 'Answer',
-        text: "Ogni dato riporta due lettere da A a E: la prima indica l'affidabilit\u00e0 della fonte, la seconda la qualit\u00e0 del dato. Ogni numero del report si pu\u00f2 ricondurre al calcolo, all'evidenza e alla fonte da cui deriva."
-      }
-    },
-    {
-      '@type': 'Question',
-      name: "Perceptra fa ancora focus group sintetici?",
-      acceptedAnswer: {
-        '@type': 'Answer',
-        text: "S\u00ec. Per i beni di consumo conduciamo studi con audience sintetiche calibrate su un panel umano di controllo; ogni studio riporta lo SHCS e non viene consegnato sotto 0,80."
-      }
-    },
-    {
-      '@type': 'Question',
-      name: "A chi si rivolge Perceptra?",
-      acceptedAnswer: {
-        '@type': 'Answer',
-        text: "A PMI e startup B2B, produttori e distributori, agenzie di marketing, commercialisti e societ\u00e0 di consulenza che hanno bisogno dei numeri reali del proprio mercato senza un budget da grande impresa."
-      }
-    }
-  ]
-};
-
-const ld = [organization, website, service, serviceAudiences, faq]
-  .map(o => `<script type="application/ld+json">${JSON.stringify(o)}</script>`)
-  .join('\n');
+      name: stripTags(d[`faq${i}_q`]),
+      acceptedAnswer: { '@type': 'Answer', text: stripTags(d[`faq${i}_a`]) }
+    }))
+  };
+  return [organization, website, mi, audiences, faq]
+    .map(o => `<script type="application/ld+json">${JSON.stringify(o)}</script>`)
+    .join('\n');
+}
 
 function head(code) {
   const m = META[code];
-  const alt = Object.entries(META)
-    .map(([c, v]) => `<link rel="alternate" hreflang="${c}" href="${ORIGIN}${v.path}">`)
+  const alt = LANGS
+    .map(c => `<link rel="alternate" hreflang="${c}" href="${ORIGIN}${META[c].path}">`)
     .join('\n');
   return `
 <link rel="canonical" href="${ORIGIN}${m.path}">
@@ -172,84 +160,74 @@ ${alt}
 <link rel="alternate" hreflang="x-default" href="${ORIGIN}/">
 <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1">
 <meta name="author" content="Perceptra">
-<meta name="geo.region" content="IT">
-<meta name="geo.placename" content="Italia">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Perceptra">
 <meta property="og:locale" content="${m.lang.replace('-', '_')}">
 <meta property="og:url" content="${ORIGIN}${m.path}">
-<meta property="og:title" content="${m.title}">
-<meta property="og:description" content="${m.desc}">
+<meta property="og:title" content="${escAttr(m.title)}">
+<meta property="og:description" content="${escAttr(m.desc)}">
 <meta property="og:image" content="${ORIGIN}/og.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Perceptra — Market Intelligence">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="${m.title}">
-<meta name="twitter:description" content="${m.desc}">
+<meta name="twitter:title" content="${escAttr(m.title)}">
+<meta name="twitter:description" content="${escAttr(m.desc)}">
 <meta name="twitter:image" content="${ORIGIN}/og.png">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/brand/apple-touch-icon.png">
-<meta name="theme-color" content="#0B1D2D">
-<meta property="og:image:alt" content="Perceptra — Market Intelligence">
-${ld}
+${jsonLd(code)}
 `;
 }
 
+/* ---------- page rendering ---------- */
 function build(code) {
   const m = META[code];
+  const dict = I18N[code];
   let h = src;
 
   h = h.replace('<html lang="it">', `<html lang="${code}">`);
   h = h.replace(/<title>[\s\S]*?<\/title>/, `<title>${m.title}</title>`);
   h = h.replace(
     /<meta name="description" id="meta-desc" content="[\s\S]*?">/,
-    `<meta name="description" id="meta-desc" content="${m.desc}">`
+    `<meta name="description" content="${escAttr(m.desc)}">`
   );
-
-  const order = ['it', 'en', 'fr'];
-  let ti = 0, di = 0;
-  h = h.replace(/(?<![A-Za-z0-9_])_title:"[^"]*",/g, () => `_title:${JSON.stringify(META[order[ti++]].title)},`);
-  h = h.replace(/(?<![A-Za-z0-9_])_desc:"[^"]*",/g, () => `_desc:${JSON.stringify(META[order[di++]].desc)},`);
-
+  h = h.replace(I18N_BLOCK, '\n');
   h = h.replace('</head>', head(code) + '</head>');
 
-  /* Pre-render translations so each language ships real text, not empty tags */
-  const dict = I18N[code] || I18N.it;
+  /* text: fill every empty element that carries a data-i18n key */
   h = h.replace(
-    /<([a-z0-9]+)([^>]*\sdata-i18n="([^"]+)"[^>]*)>\s*<\/\1>/g,
-    (whole, tag, attrs, key) =>
-      dict[key] !== undefined ? `<${tag}${attrs}>${dict[key]}</${tag}>` : whole
+    /<([a-z0-9]+)([^>]*?)\sdata-i18n="([^"]+)"([^>]*)>\s*<\/\1>/g,
+    (whole, tag, before, key, after) => `<${tag}${before}${after}>${dict[key]}</${tag}>`
   );
-
-  /* Language switcher navigates to the sibling URL instead of swapping text */
-  h = h.replace(
-    /\/\* Auto-detect[\s\S]*?\}\)\(\);/,
-    `(function(){
-  const CUR = ${JSON.stringify(code)};
-  const PATHS = {it:"/", en:"/en", fr:"/fr"};
-  document.querySelectorAll('.lang button').forEach(b=>{
-    const l = b.dataset.lang;
-    b.classList.toggle('active', l===CUR);
-    b.setAttribute('aria-pressed', l===CUR ? 'true':'false');
-    b.addEventListener('click',()=>{ location.href = PATHS[l]; });
+  /* accessible names */
+  h = h.replace(/\sdata-i18n-aria="([^"]+)"/g, (whole, key) => ` aria-label="${escAttr(stripTags(dict[key]))}"`);
+  /* language switch: mark the current language */
+  h = h.replace(/<a([^>]*?)\sdata-lang="([a-z]{2})"([^>]*)>/g, (whole, before, lang, after) =>
+    `<a${before}${after}${lang === code ? ' aria-current="true"' : ''}>`);
+  /* app links: language and campaign tracking */
+  h = h.replace(/<a([^>]*?)\sdata-app="([a-z-]+)"([^>]*)>/g, (whole, before, path, after) => {
+    const attrs = before + after;
+    const utm = (/\sdata-utm="([a-z-]+)"/.exec(attrs) || [])[1] || 'site';
+    const href = `${APP}/${path}?lang=${code}&amp;utm_source=perceptra.eu&amp;utm_medium=site&amp;utm_campaign=${utm}`;
+    return `<a${attrs.replace(/\sdata-utm="[^"]*"/, '').replace(/\shref="[^"]*"/, ` href="${href}"`)}>`;
   });
-})();`
-  );
 
+  const leftover = h.match(/data-i18n|const I18N/);
+  if (leftover) throw new Error(`${code}: untranslated markup left in output (${leftover[0]})`);
   return h;
 }
 
-for (const code of Object.keys(META)) {
-  writeFileSync('public/' + META[code].file, build(code));
-}
+for (const code of LANGS) writeFileSync('public/' + META[code].file, build(code));
 
+/* ---------- sitemap, robots, llms.txt ---------- */
 const today = new Date().toISOString().slice(0, 10);
-const urls = Object.values(META).map(m => `  <url>
+const urls = LANGS.map(c => META[c]).map(m => `  <url>
     <loc>${ORIGIN}${m.path}</loc>
     <lastmod>${today}</lastmod>
-    <changefreq>weekly</changefreq>
+    <changefreq>monthly</changefreq>
     <priority>${m.path === '/' ? '1.0' : '0.8'}</priority>
-${Object.entries(META).map(([c, v]) => `    <xhtml:link rel="alternate" hreflang="${c}" href="${ORIGIN}${v.path}"/>`).join('\n')}
+${LANGS.map(c => `    <xhtml:link rel="alternate" hreflang="${c}" href="${ORIGIN}${META[c].path}"/>`).join('\n')}
   </url>`).join('\n');
 
 writeFileSync('public/sitemap.xml', `<?xml version="1.0" encoding="UTF-8"?>
@@ -266,9 +244,10 @@ Sitemap: ${ORIGIN}/sitemap.xml
 
 writeFileSync('public/llms.txt', `# Perceptra
 
-> Perceptra è una società di market intelligence per il B2B europeo. Ricostruisce i numeri
-> di un mercato (dimensione per prodotto e area, quote, operatori, previsioni) anche quando i dati
-> non esistono già pronti, con una metodologia proprietaria. Ogni numero riporta fonte e rating.
+> Perceptra è una società di market intelligence. Ricostruisce i numeri di un mercato
+> (dimensione per prodotto e area, quote, operatori, previsioni) anche quando i dati non
+> esistono già pronti, con una metodologia proprietaria. Ogni numero riporta fonte e rating.
+> Secondo motore: audience sintetiche calibrate su panel umani.
 
 ## Market Intelligence (servizio principale)
 - Dimensione del mercato per prodotto e area geografica.
@@ -294,24 +273,24 @@ Ogni studio riporta lo SHCS (Synthetic-Human Correlation Score); sotto 0,80 non 
 ## Per chi
 PMI e startup B2B, produttori e distributori, agenzie di marketing, commercialisti e società di consulenza.
 
-## Lingue e mercati
-Italiano (/), inglese (/en), francese (/fr). Mercati serviti: Italia, Francia, Unione Europea.
+## Lingue
+Italiano (/), inglese (/en), francese (/fr).
 
 ## Contatti
 Email: hello@perceptra.eu
 Sito: ${ORIGIN}
 `);
 
-/* brand assets: official logo pack (brand/), favicon = official symbol */
+/* ---------- assets ---------- */
+/* official logo pack (brand/), favicon = official symbol */
 cpSync('brand', 'public/brand', { recursive: true });
 copyFileSync('brand/perceptra-symbol.svg', 'public/favicon.svg');
 
-
-/* carry over any other asset sitting next to index.html (og.png, etc.) */
-import { readdirSync, copyFileSync, cpSync, statSync } from 'node:fs';
+/* any other file next to index.html (og.png, 404.html, ...) */
+const SKIP = ['index.html', 'seo.mjs', 'package.json', 'vercel.json', 'CNAME', 'README.md'];
 for (const f of readdirSync('.')) {
-  if (['index.html', 'seo.mjs', 'package.json', 'vercel.json', 'public', 'node_modules', '.git', 'CNAME'].includes(f)) continue;
+  if (f.startsWith('.') || SKIP.includes(f)) continue;
   if (statSync(f).isFile()) copyFileSync(f, 'public/' + f);
 }
 
-console.log('SEO build ok \u2014 flat URLs, translations pre-rendered');
+console.log(`build ok — ${LANGS.length} languages, ${used.size} keys checked`);
