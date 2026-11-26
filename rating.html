@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Scala di rating del dato — Perceptra</title>
+<meta name="description" id="meta-desc" content="Come Perceptra valuta ogni numero: due lettere da A a E per affidabilità della fonte e qualità del dato.">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#F5F8F9" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0B1D2D" media="(prefers-color-scheme: dark)">
+<script>
+/* before first paint: mark JS as available and apply a saved theme choice */
+(function(){var d=document.documentElement;d.classList.add('js');try{var t=localStorage.getItem('perceptra-theme');if(t==='light'||t==='dark')d.setAttribute('data-theme',t);}catch(e){}})();
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400..600;1,6..72,400..600&family=Instrument+Sans:wght@400..600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<!--
+  Data rating scale page (/rating, /en/rating, /fr/rating).
+  Built by seo.mjs, not usable as a raw file: the build adds the home's styles, header and
+  footer (from index.html) and fills the text from two dictionaries, the home's and this
+  page's (keys r_*). Preview with `npm run dev`.
+  The meaning of the scale must stay word for word with the home's reliability section:
+  the grade card below reuses its keys (a_label, a_src, a_qual, a_desc).
+-->
+<style>
+/* @shared-styles: the home's stylesheet, inserted by seo.mjs */
+
+/* ---------- rating page ---------- */
+.r-hero .grade{box-shadow:var(--shadow)}
+.grade .foot{margin-top:1.1rem;padding-top:1rem;border-top:1px dashed var(--line-2);font-size:.92rem;color:var(--text-2)}
+.grade .foot b{font-family:var(--f-mono);font-weight:500;color:var(--text)}
+.toc{display:flex;flex-wrap:wrap;align-items:center;gap:.5rem .6rem;margin-top:1.9rem}
+.toc .label{color:var(--muted);margin-right:.2rem}
+
+/* scale tables */
+.tbl{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);overflow:hidden}
+.tbl table{width:100%;border-collapse:collapse}
+.tbl th{text-align:left;font-family:var(--f-mono);font-size:.75rem;font-weight:500;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);padding:.8rem 1.25rem;background:var(--surface-2);border-bottom:1px solid var(--line)}
+.tbl td{padding:1rem 1.25rem;vertical-align:middle;color:var(--text-2);border-top:1px solid var(--line);line-height:1.45}
+.tbl tbody tr:first-child td{border-top:0}
+.tbl td b{display:block;color:var(--text);font-weight:600}
+.tbl .k{width:5.25rem}
+.tbl .x{color:var(--muted);font-size:.94rem}
+.tbl .code{width:6rem;font-family:var(--f-mono);font-size:.92rem;color:var(--accent);white-space:nowrap}
+.tbl .q{width:6rem;text-align:right}
+.g{display:inline-grid;place-items:center;width:2.4rem;height:2.4rem;border-radius:var(--r-sm);font-family:var(--f-display);font-style:normal;font-weight:500;font-size:1.5rem;line-height:1;color:var(--accent);background:var(--tint);border:1px solid var(--line)}
+.g.sm{width:2rem;height:2rem;font-size:1.2rem}
+.g.none{font-family:var(--f-mono);font-size:.95rem;color:var(--muted);background:transparent}
+.note{margin-top:1.1rem;padding:.9rem 1.1rem;border-left:2px solid var(--fill);background:var(--tint);border-radius:0 var(--r-sm) var(--r-sm) 0;color:var(--text-2);font-size:.97rem;max-width:74ch}
+.note b{color:var(--text)}
+.codes{margin-top:.2rem;font-family:var(--f-mono);font-size:.78rem;line-height:1.5;color:var(--muted)}
+
+/* rules (dark band) */
+/* R·01 and R·03 stack beside the longer R·02; R·04 runs below */
+.rules{display:grid;grid-template-columns:1fr 1fr;grid-template-areas:"r1 r2" "r3 r2" "r4 r4";gap:1rem;align-items:start}
+.rule:nth-child(1){grid-area:r1}
+.rule:nth-child(2){grid-area:r2;align-self:stretch}
+.rule:nth-child(3){grid-area:r3;align-self:stretch}
+.rule:nth-child(4){grid-area:r4}
+.rule{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:clamp(1.3rem,2.5vw,1.8rem)}
+.rule .n{font-family:var(--f-mono);font-size:.78rem;letter-spacing:.08em;color:var(--accent)}
+.rule h3{margin:.45rem 0 .55rem}
+.rule p{color:var(--text-2);font-size:.97rem}
+.rule p+p,.bases+p{margin-top:.75rem}
+.bases{display:grid;gap:.5rem;margin-top:.9rem}
+.bases li{display:grid;grid-template-columns:2rem 1fr;gap:.75rem;align-items:center;font-size:.95rem;color:var(--text-2);line-height:1.35}
+.bases li b{color:var(--text);font-weight:600}
+
+/* worked example */
+.ex{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);overflow:hidden;box-shadow:var(--shadow)}
+.ex-row{display:grid;grid-template-columns:2.4rem 1fr auto;gap:1rem;align-items:center;padding:.95rem 1.25rem;border-top:1px solid var(--line)}
+.ex-row:first-child{border-top:0}
+.ex-row .i{font-family:var(--f-mono);font-size:.8rem;color:var(--muted)}
+.ex-row .t{font-weight:500;line-height:1.35}
+.ex-row .t span{display:block;margin-top:.15rem;color:var(--muted);font-size:.88rem;font-weight:400}
+.ex-row .rating{font-size:1.6rem}
+.ex-row.calc{background:var(--surface-2)}
+.ex-row.calc .i,.ex-row.final .i{font-size:1.05rem;color:var(--accent)}
+.ex-row.final{background:var(--tint);box-shadow:inset 3px 0 0 var(--fill)}
+.ex-row .tag{font-family:var(--f-mono);font-size:.75rem;color:var(--accent);padding:.25rem .65rem;border-radius:999px;background:var(--tint);white-space:nowrap}
+.ex-cap{padding:.65rem 1.25rem;border-top:1px solid var(--line);font-family:var(--f-mono);font-size:.75rem;color:var(--muted)}
+
+/* limits */
+.limits{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem}
+.limit{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:1.6rem}
+.limit h3{margin-bottom:.55rem}
+.limit p{color:var(--text-2);font-size:.97rem}
+
+@media (max-width:900px){
+  .rules,.limits{grid-template-columns:1fr}
+  .rules{grid-template-areas:"r1" "r2" "r3" "r4"}
+}
+@media (max-width:600px){
+  .tbl th,.tbl td{padding-left:1rem;padding-right:1rem}
+  .tbl.stack thead{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap}
+  .tbl.stack tr{display:grid;grid-template-columns:auto 1fr;column-gap:1rem;row-gap:.3rem;padding:1rem;border-top:1px solid var(--line)}
+  .tbl.stack tbody tr:first-child{border-top:0}
+  .tbl.stack td{display:block;width:auto;padding:0;border:0}
+  .tbl.stack .k{grid-row:span 2}
+  /* flags: the code above its meaning, the letter on the right */
+  .tbl.flags thead{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap}
+  .tbl.flags tr{display:grid;grid-template-columns:1fr auto;column-gap:1rem;row-gap:.2rem;align-items:center;padding:.85rem 1rem;border-top:1px solid var(--line)}
+  .tbl.flags tbody tr:first-child{border-top:0}
+  .tbl.flags td{display:block;width:auto;padding:0;border:0;text-align:left}
+  .tbl.flags .code{grid-column:1;grid-row:1;font-size:.85rem}
+  .tbl.flags td:nth-child(2){grid-column:1;grid-row:2}
+  .tbl.flags .q{grid-column:2;grid-row:1/span 2}
+  .tbl .code,.tbl .q{width:auto}
+  .ex-row{grid-template-columns:1.6rem 1fr auto;gap:.7rem;padding:.85rem 1rem}
+  .ex-row .rating{font-size:1.35rem}
+  .ex-cap{padding-left:1rem;padding-right:1rem}
+}
+</style>
+</head>
+<body>
+<a class="skip" href="#main" data-i18n="n_skip"></a>
+
+<!-- @header: the home's header, inserted by seo.mjs -->
+
+<main id="main">
+
+<!-- ============ HERO ============ -->
+<section class="hero r-hero grid-bg" id="top">
+  <div class="wrap">
+    <div class="hero-grid">
+      <div>
+        <p class="label eyebrow" data-i18n="r_eyebrow"></p>
+        <h1 data-i18n="r_title"></h1>
+        <p class="lead" data-i18n="r_lead"></p>
+        <nav class="toc" data-i18n-aria="r_toc">
+          <span class="label" data-i18n="r_toc"></span>
+          <a class="chip" href="#fonte" data-i18n="r_toc1"></a>
+          <a class="chip" href="#qualita" data-i18n="r_toc2"></a>
+          <a class="chip" href="#segnali" data-i18n="r_toc3"></a>
+          <a class="chip" href="#regole" data-i18n="r_toc4"></a>
+          <a class="chip" href="#esempio" data-i18n="r_toc5"></a>
+          <a class="chip" href="#limiti" data-i18n="r_toc6"></a>
+        </nav>
+      </div>
+
+      <!-- same card as the home's reliability section, same keys -->
+      <div class="grade">
+        <span class="label" data-i18n="a_label"></span>
+        <div class="tiles">
+          <div class="tile">
+            <b>A</b><span data-i18n="a_src"></span>
+            <div class="scale" aria-hidden="true"><i class="on">A</i><i>B</i><i>C</i><i>D</i><i>E</i></div>
+          </div>
+          <div class="tile">
+            <b>B</b><span data-i18n="a_qual"></span>
+            <div class="scale" aria-hidden="true"><i>A</i><i class="on">B</i><i>C</i><i>D</i><i>E</i></div>
+          </div>
+        </div>
+        <p data-i18n="a_desc"></p>
+        <p class="foot" data-i18n="r_an_foot"></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ FIRST LETTER: SOURCE RELIABILITY ============ -->
+<section class="section alt" id="fonte">
+  <div class="wrap">
+    <div class="sec-head rv">
+      <p class="label eyebrow" data-i18n="r_s1_eyebrow"></p>
+      <h2 id="h-fonte" data-i18n="r_s1_title"></h2>
+      <p class="lead" data-i18n="r_s1_lead"></p>
+    </div>
+    <div class="tbl stack rv">
+      <table aria-labelledby="h-fonte">
+        <thead><tr><th scope="col" data-i18n="r_th_class"></th><th scope="col" data-i18n="r_th_source"></th><th scope="col" data-i18n="r_th_examples"></th></tr></thead>
+        <tbody>
+          <tr><td class="k"><span class="g">A</span></td><td><b data-i18n="r_c1_t"></b><span data-i18n="r_c1_d"></span></td><td class="x" data-i18n="r_c1_x"></td></tr>
+          <tr><td class="k"><span class="g">B</span></td><td><b data-i18n="r_c2_t"></b><span data-i18n="r_c2_d"></span></td><td class="x" data-i18n="r_c2_x"></td></tr>
+          <tr><td class="k"><span class="g">C</span></td><td><b data-i18n="r_c3_t"></b><span data-i18n="r_c3_d"></span></td><td class="x" data-i18n="r_c3_x"></td></tr>
+          <tr><td class="k"><span class="g">D</span></td><td><b data-i18n="r_c4_t"></b><span data-i18n="r_c4_d"></span></td><td class="x" data-i18n="r_c4_x"></td></tr>
+          <tr><td class="k"><span class="g">E</span></td><td><b data-i18n="r_c5_t"></b><span data-i18n="r_c5_d"></span></td><td class="x" data-i18n="r_c5_x"></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="note rv" data-i18n="r_s1_note"></p>
+  </div>
+</section>
+
+<!-- ============ SECOND LETTER: DATA QUALITY ============ -->
+<section class="section" id="qualita">
+  <div class="wrap">
+    <div class="split">
+      <div class="sec-head rv">
+        <p class="label eyebrow" data-i18n="r_s2_eyebrow"></p>
+        <h2 id="h-qualita" data-i18n="r_s2_title"></h2>
+        <p class="lead" data-i18n="r_s2_lead"></p>
+      </div>
+      <div class="tbl stack rv">
+        <table aria-labelledby="h-qualita">
+          <thead><tr><th scope="col" data-i18n="r_th_letter"></th><th scope="col" data-i18n="r_th_meaning"></th></tr></thead>
+          <tbody>
+            <tr><td class="k"><span class="g">A</span></td><td><b data-i18n="r_q1_t"></b><span data-i18n="r_q1_d"></span></td></tr>
+            <tr><td class="k"><span class="g">B</span></td><td><b data-i18n="r_q2_t"></b><span data-i18n="r_q2_d"></span></td></tr>
+            <tr><td class="k"><span class="g">C</span></td><td><b data-i18n="r_q3_t"></b><span data-i18n="r_q3_d"></span></td></tr>
+            <tr><td class="k"><span class="g">D</span></td><td><b data-i18n="r_q4_t"></b><span data-i18n="r_q4_d"></span></td></tr>
+            <tr><td class="k"><span class="g">E</span></td><td><b data-i18n="r_q5_t"></b><span data-i18n="r_q5_d"></span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ OFFICIAL FLAGS ============ -->
+<section class="section alt" id="segnali">
+  <div class="wrap">
+    <div class="split">
+      <div class="sec-head rv">
+        <p class="label eyebrow" data-i18n="r_s3_eyebrow"></p>
+        <h2 id="h-segnali" data-i18n="r_s3_title"></h2>
+        <p class="lead" data-i18n="r_s3_lead"></p>
+        <p class="codes" data-i18n="r_s3_codes"></p>
+      </div>
+      <div class="tbl flags rv">
+        <table aria-labelledby="h-segnali">
+          <thead><tr><th scope="col" data-i18n="r_th_flag"></th><th scope="col" data-i18n="r_th_meaning"></th><th scope="col" class="q" data-i18n="r_th_quality"></th></tr></thead>
+          <tbody>
+            <tr><td class="code">—</td><td><b data-i18n="r_f1_t"></b><span data-i18n="r_f1_d"></span></td><td class="q"><span class="g sm">A</span></td></tr>
+            <tr><td class="code">r</td><td><b data-i18n="r_f2_t"></b><span data-i18n="r_f2_d"></span></td><td class="q"><span class="g sm">A</span></td></tr>
+            <tr><td class="code">b</td><td><b data-i18n="r_f3_t"></b><span data-i18n="r_f3_d"></span></td><td class="q"><span class="g sm">A</span></td></tr>
+            <tr><td class="code">p</td><td><b data-i18n="r_f4_t"></b></td><td class="q"><span class="g sm">B</span></td></tr>
+            <tr><td class="code">d</td><td><b data-i18n="r_f5_t"></b><span data-i18n="r_f5_d"></span></td><td class="q"><span class="g sm">B</span></td></tr>
+            <tr><td class="code">e · E · s</td><td><b data-i18n="r_f6_t"></b><span data-i18n="r_f6_d"></span></td><td class="q"><span class="g sm">C</span></td></tr>
+            <tr><td class="code">i</td><td><b data-i18n="r_f7_t"></b><span data-i18n="r_f7_d"></span></td><td class="q"><span class="g sm">C</span></td></tr>
+            <tr><td class="code">R</td><td><b data-i18n="r_f8_t"></b></td><td class="q"><span class="g sm">C</span></td></tr>
+            <tr><td class="code">f</td><td><b data-i18n="r_f9_t"></b></td><td class="q"><span class="g sm">D</span></td></tr>
+            <tr><td class="code">u · U</td><td><b data-i18n="r_f10_t"></b><span data-i18n="r_f10_d"></span></td><td class="q"><span class="g sm">D</span></td></tr>
+            <tr><td class="code">?</td><td><b data-i18n="r_f11_t"></b><span data-i18n="r_f11_d"></span></td><td class="q"><span class="g sm">D</span></td></tr>
+            <tr><td class="code">c · C</td><td><b data-i18n="r_f12_t"></b><span data-i18n="r_f12_d"></span></td><td class="q"><span class="g sm none">—</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ COMBINATION RULES (dark band) ============ -->
+<section class="section band grid-bg" id="regole">
+  <div class="wrap">
+    <div class="sec-head rv">
+      <p class="label eyebrow" data-i18n="r_s4_eyebrow"></p>
+      <h2 data-i18n="r_s4_title"></h2>
+      <p class="lead" data-i18n="r_s4_lead"></p>
+    </div>
+    <div class="rules rv">
+      <article class="rule"><span class="n" aria-hidden="true">R·01</span><h3 data-i18n="r_r1_t"></h3><p data-i18n="r_r1_p"></p></article>
+      <article class="rule">
+        <span class="n" aria-hidden="true">R·02</span><h3 data-i18n="r_r2_t"></h3><p data-i18n="r_r2_p"></p>
+        <ul class="bases">
+          <li><span class="g sm none" aria-hidden="true">≤</span><span><b data-i18n="r_r2_b1"></b> <span data-i18n="r_r2_b1d"></span></span></li>
+          <li><span class="g sm" aria-hidden="true">D</span><span><b data-i18n="r_r2_b2"></b> <span data-i18n="r_r2_b2d"></span></span></li>
+          <li><span class="g sm" aria-hidden="true">E</span><span><b data-i18n="r_r2_b3"></b> <span data-i18n="r_r2_b3d"></span></span></li>
+          <li><span class="g sm none" aria-hidden="true">—</span><span><b data-i18n="r_r2_b4"></b> <span data-i18n="r_r2_b4d"></span></span></li>
+        </ul>
+        <p data-i18n="r_r2_ai"></p>
+      </article>
+      <article class="rule"><span class="n" aria-hidden="true">R·03</span><h3 data-i18n="r_r3_t"></h3><p data-i18n="r_r3_p"></p></article>
+      <article class="rule"><span class="n" aria-hidden="true">R·04</span><h3 data-i18n="r_r4_t"></h3><p data-i18n="r_r4_p"></p></article>
+    </div>
+  </div>
+</section>
+
+<!-- ============ WORKED EXAMPLE ============ -->
+<section class="section" id="esempio">
+  <div class="wrap">
+    <div class="split">
+      <div class="sec-head rv">
+        <p class="label eyebrow" data-i18n="r_s5_eyebrow"></p>
+        <h2 data-i18n="r_s5_title"></h2>
+        <p class="lead" data-i18n="r_s5_lead"></p>
+      </div>
+      <figure class="ex rv">
+        <div class="ex-row"><span class="i" aria-hidden="true">01</span><span class="t" data-i18n="r_e1"></span><span class="rating"><b>A</b><b>C</b></span></div>
+        <div class="ex-row"><span class="i" aria-hidden="true">02</span><span class="t" data-i18n="r_e2"></span><span class="rating"><b>A</b><b>A</b></span></div>
+        <div class="ex-row"><span class="i" aria-hidden="true">03</span><span class="t" data-i18n="r_e3"></span><span class="rating"><b>A</b><b>A</b></span></div>
+        <div class="ex-row calc"><span class="i" aria-hidden="true">=</span><span class="t" data-i18n="r_e4"></span><span class="rating"><b>A</b><b>C</b></span></div>
+        <div class="ex-row"><span class="i" aria-hidden="true">04</span><span class="t" data-i18n="r_e5"></span><span class="tag" data-i18n="r_e5_tag"></span></div>
+        <div class="ex-row final"><span class="i" aria-hidden="true">=</span><span class="t" data-i18n="r_e6"></span><span class="rating"><b>A</b><b>D</b></span></div>
+        <figcaption class="ex-cap" data-i18n="r_e_cap"></figcaption>
+      </figure>
+    </div>
+  </div>
+</section>
+
+<!-- ============ LIMITS ============ -->
+<section class="section alt" id="limiti">
+  <div class="wrap">
+    <div class="sec-head rv">
+      <p class="label eyebrow" data-i18n="r_s6_eyebrow"></p>
+      <h2 data-i18n="r_s6_title"></h2>
+    </div>
+    <div class="limits rv">
+      <article class="limit"><h3 data-i18n="r_l1_t"></h3><p data-i18n="r_l1_p"></p></article>
+      <article class="limit"><h3 data-i18n="r_l2_t"></h3><p data-i18n="r_l2_p"></p></article>
+      <article class="limit"><h3 data-i18n="r_l3_t"></h3><p data-i18n="r_l3_p"></p></article>
+    </div>
+  </div>
+</section>
+
+<!-- ============ CONTACT (same texts as the home's contact section) ============ -->
+<section class="section contact" id="contatti">
+  <div class="grid-bg">
+    <div class="wrap rv">
+      <p class="label eyebrow" data-i18n="ct_eyebrow"></p>
+      <h2 data-i18n="r_ct_title"></h2>
+      <p class="lead" data-i18n="ct_lead"></p>
+      <div class="ctas">
+        <a class="btn btn-primary" href="mailto:hello@perceptra.eu?subject=Rating"><span data-i18n="ct_b1"></span><span class="arr" aria-hidden="true">→</span></a>
+        <a class="btn btn-secondary" href="/#metodo" data-i18n="h_cta2"></a>
+      </div>
+      <p class="mail"><span data-i18n="ct_mail"></span> <a href="mailto:hello@perceptra.eu">hello@perceptra.eu</a></p>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<!-- @footer: the home's footer, inserted by seo.mjs -->
+
+<script id="i18n">
+/* Texts of this page (keys r_*). Header, footer and the shared cards use the home's dictionary.
+   The build (seo.mjs) merges both, pre-renders one page per language and removes this block. */
+const I18N = {
+it:{
+  r_eyebrow:"Affidabilità · Scala di rating",
+  r_title:"Ogni numero porta due lettere. <em>Ecco cosa significano.</em>",
+  r_lead:"Il rating dichiara quanto fidarsi di un dato prima di usarlo per decidere. Qui trovi cosa misura ogni lettera, come si combinano e cosa non dicono.",
+  r_toc:"In questa pagina",
+  r_toc1:"Affidabilità della fonte",
+  r_toc2:"Qualità del dato",
+  r_toc3:"Segnali ufficiali",
+  r_toc4:"Regole",
+  r_toc5:"Esempio",
+  r_toc6:"Limiti",
+  r_an_foot:"Le due lettere sono indipendenti. Un istituto statistico può pubblicare un valore stimato (<b>AC</b>); un bilancio depositato riporta un valore definitivo (<b>BA</b>).",
+  r_s1_eyebrow:"Prima lettera",
+  r_s1_title:"Affidabilità della fonte. <em>Chi pubblica il dato, e con quali controlli.</em>",
+  r_s1_lead:"Dipende da chi produce il dato e da quali controlli subisce prima di essere pubblicato. Si assegna alla fonte e vale per ogni dato che ne proviene.",
+  r_th_class:"Classe",
+  r_th_source:"Tipo di fonte",
+  r_th_examples:"Esempi",
+  r_c1_t:"Statistica ufficiale",
+  r_c1_d:"Istituti statistici nazionali ed europei, organismi internazionali",
+  r_c1_x:"Eurostat, istituti nazionali di statistica, OCSE, Banca Mondiale",
+  r_c2_t:"Registri e depositi regolamentati",
+  r_c2_d:"Dati che la legge obbliga a depositare, con controlli formali",
+  r_c2_x:"Registri delle imprese, bilanci depositati, codici LEI",
+  r_c3_t:"Aggregatori commerciali",
+  r_c3_d:"Banche dati private che raccolgono e armonizzano fonti primarie",
+  r_c3_x:"Fornitori di dati aziendali e di informazioni commerciali",
+  r_c4_t:"Fonti pubbliche non verificate",
+  r_c4_d:"Informazioni pubbliche senza un controllo indipendente",
+  r_c4_x:"Siti aziendali, stampa, associazioni di categoria",
+  r_c5_t:"Dichiarazioni non controllate",
+  r_c5_d:"Dati che non possiamo verificare in modo indipendente",
+  r_c5_x:"Materiali e dati forniti dal cliente, dichiarazioni non verificate",
+  r_s1_note:"<b>Classe D non vuol dire sbagliato.</b> Vuol dire che nessuno lo ha controllato prima di noi. Il rating lo dichiara, e un risultato che usa quel dato non può valere più di D.",
+  r_s2_eyebrow:"Seconda lettera",
+  r_s2_title:"Qualità del dato. <em>Come è stato prodotto quel valore.</em>",
+  r_s2_lead:"Riguarda il singolo valore: se è definitivo, se è stimato, come lo abbiamo estratto. Due dati della stessa fonte possono avere qualità diverse.",
+  r_th_letter:"Lettera",
+  r_th_meaning:"Significato",
+  r_q1_t:"Definitivo e misurato",
+  r_q1_d:"Estratto in modo automatico e ripetibile",
+  r_q2_t:"Provvisorio o appena rivisto",
+  r_q2_d:"Oppure letto da una tabella e controllato",
+  r_q3_t:"Stimato o arrotondato dalla fonte",
+  r_q3_d:"Oppure con copertura parziale",
+  r_q4_t:"Non verificato",
+  r_q4_d:"Letto da testo libero senza verifica, o ottenuto con un metodo non dichiarato",
+  r_q5_t:"Incoerente o segnalato come errato",
+  r_q5_d:"Non va mai usato da solo",
+  r_s3_eyebrow:"Statistiche ufficiali",
+  r_s3_title:"Dai segnali ufficiali alla lettera.",
+  r_s3_lead:"Gli istituti statistici accompagnano i valori con segnali standard: provvisorio, stimato, riservato. Li traduciamo in automatico, sempre allo stesso modo.",
+  r_s3_codes:"Minuscole: statistiche Eurostat. Maiuscole: statistiche del commercio estero.",
+  r_th_flag:"Segnale",
+  r_th_quality:"Qualità",
+  r_f1_t:"Nessun segnale",
+  r_f1_d:"Valore normale",
+  r_f2_t:"Rivisto",
+  r_f2_d:"Valore corretto dalla fonte",
+  r_f3_t:"Interruzione di serie",
+  r_f3_d:"Valore valido; la rottura è segnalata nel report",
+  r_f4_t:"Provvisorio",
+  r_f5_t:"Definizione diversa",
+  r_f5_d:"Il valore non segue esattamente la definizione standard",
+  r_f6_t:"Stimato",
+  r_f6_d:"Dalla fonte, o dall'ufficio statistico europeo",
+  r_f7_t:"Imputato",
+  r_f7_d:"Valore ricostruito dalla fonte",
+  r_f8_t:"Arrotondato",
+  r_f9_t:"Previsione",
+  r_f10_t:"Bassa affidabilità",
+  r_f10_d:"Segnalata dalla fonte stessa",
+  r_f11_t:"Segnale non riconosciuto",
+  r_f11_d:"Per prudenza",
+  r_f12_t:"Riservato",
+  r_f12_d:"Il valore non si registra. Se serve, lo stimiamo con un metodo dichiarato e un rating proprio",
+  r_s4_eyebrow:"Regole",
+  r_s4_title:"Come si combinano i rating. <em>Decide l'anello più debole.</em>",
+  r_s4_lead:"Un risultato nasce da più dati e da ipotesi. Il suo rating non può essere migliore dell'anello più debole, e lungo la catena non migliora mai.",
+  r_r1_t:"Vince la lettera peggiore",
+  r_r1_p:"Per ciascuna delle due lettere, un risultato prende la peggiore tra quelle dei dati che usa. Un calcolo con un dato AA e uno AC vale AC.",
+  r_r2_t:"Anche le ipotesi hanno un voto",
+  r_r2_p:"Ogni ipotesi è dichiarata e ha un rating. La seconda lettera è la confidenza dichiarata sull'ipotesi (E se manca). La prima dipende dalla sua base:",
+  r_r2_b1:"Basata su dati:",
+  r_r2_b1d:"la fonte peggiore tra i dati collegati",
+  r_r2_b2:"Per analogia con un altro mercato:",
+  r_r2_b2d:"non migliore di D",
+  r_r2_b3:"Giudizio di un esperto:",
+  r_r2_b3d:"sempre E",
+  r_r2_b4:"Convenzione di metodo dichiarata:",
+  r_r2_b4d:"non peggiora il rating",
+  r_r2_ai:"Anche la stima di un modello di intelligenza artificiale è un'ipotesi con il suo rating: il modello non produce mai un numero finale.",
+  r_r3_t:"Ogni passaggio di stima costa",
+  r_r3_p:"Una stima dell'anno in corso non può avere qualità migliore di C, una previsione non migliore di D, anche quando i dati di partenza sono eccellenti. In una proiezione, C vale solo per il primo anno dopo la serie e solo se l'errore misurato sugli anni passati resta entro il 5%. Una ripartizione regionale abbassa la qualità di una lettera, fino a D.",
+  r_r4_t:"Nessun numero senza fonte",
+  r_r4_p:"Ogni valore resta collegato all'evidenza originale e alla fonte. Se un dato necessario è riservato o manca, il calcolo resta segnato come non calcolabile, oppure il dato si stima con un metodo dichiarato e con il suo rating.",
+  r_s5_eyebrow:"Esempio",
+  r_s5_title:"Il consumo di un prodotto in una regione.",
+  r_s5_lead:"Il consumo nazionale si ricava da produzione, importazioni ed esportazioni; poi si ripartisce sulla regione secondo gli addetti dei settori utilizzatori. Ecco come si muovono le lettere.",
+  r_e1:"Produzione nazionale<span>Istituto statistico · valore arrotondato dalla fonte</span>",
+  r_e2:"Importazioni<span>Statistica del commercio estero · valore definitivo</span>",
+  r_e3:"Esportazioni<span>Statistica del commercio estero · valore definitivo</span>",
+  r_e4:"Consumo nazionale = produzione + import − export<span>Vince la lettera peggiore per ciascuna posizione</span>",
+  r_e5:"Ripartizione regionale<span>Quota della regione secondo gli addetti dei settori utilizzatori</span>",
+  r_e5_tag:"qualità −1",
+  r_e6:"Consumo della regione<span>Rating del risultato riportato nel report</span>",
+  r_e_cap:"Esempio illustrativo: nessun dato di clienti.",
+  r_s6_eyebrow:"Limiti",
+  r_s6_title:"Cosa il rating non dice.",
+  r_l1_t:"Se la risposta è giusta per te",
+  r_l1_p:"Il rating misura il dato. Quanto il risultato risponde alla tua domanda si discute a parte nel report, con intervallo, ipotesi e metodo.",
+  r_l2_t:"Se la fonte è seria",
+  r_l2_p:"La classe descrive i controlli sul dato, non la reputazione di chi lo pubblica. Una fonte D può contenere informazioni preziose.",
+  r_l3_t:"Che il rischio sia zero",
+  r_l3_p:"Un rating alto riduce l'incertezza, non la elimina. Per questo ogni numero resta verificabile fino alla fonte.",
+  r_ct_title:"Vuoi vedere la scala <em>applicata ai tuoi numeri?</em>"
+},
+en:{
+  r_eyebrow:"Reliability · Rating scale",
+  r_title:"Every figure carries two letters. <em>Here is what they mean.</em>",
+  r_lead:"The rating states how far a data point can be trusted before you base a decision on it. Here is what each letter measures, how they combine and what they don't tell you.",
+  r_toc:"On this page",
+  r_toc1:"Source reliability",
+  r_toc2:"Data quality",
+  r_toc3:"Official flags",
+  r_toc4:"Rules",
+  r_toc5:"Example",
+  r_toc6:"Limits",
+  r_an_foot:"The two letters are independent. A statistical office can publish an estimated value (<b>AC</b>); filed accounts report a final value (<b>BA</b>).",
+  r_s1_eyebrow:"First letter",
+  r_s1_title:"Source reliability. <em>Who publishes the data, and with what checks.</em>",
+  r_s1_lead:"It depends on who produces the data and what checks it goes through before publication. It is set for the source and applies to every data point coming from it.",
+  r_th_class:"Class",
+  r_th_source:"Source type",
+  r_th_examples:"Examples",
+  r_c1_t:"Official statistics",
+  r_c1_d:"National and European statistical offices, international organisations",
+  r_c1_x:"Eurostat, national statistical institutes, OECD, World Bank",
+  r_c2_t:"Regulated registers and filings",
+  r_c2_d:"Data that companies are legally required to file, with formal checks",
+  r_c2_x:"Business registers, filed accounts, LEI codes",
+  r_c3_t:"Commercial aggregators",
+  r_c3_d:"Private databases that collect and harmonise primary sources",
+  r_c3_x:"Company data and business information providers",
+  r_c4_t:"Unverified public sources",
+  r_c4_d:"Public information without independent checks",
+  r_c4_x:"Company websites, press, trade associations",
+  r_c5_t:"Unchecked statements",
+  r_c5_d:"Data we cannot verify independently",
+  r_c5_x:"Materials and data supplied by the client, unverified statements",
+  r_s1_note:"<b>Class D does not mean wrong.</b> It means nobody checked it before us. The rating says so, and a result that uses that data point cannot be rated better than D.",
+  r_s2_eyebrow:"Second letter",
+  r_s2_title:"Data quality. <em>How that value was produced.</em>",
+  r_s2_lead:"It is about the single value: whether it is final, whether it is estimated, how we extracted it. Two data points from the same source can have different quality.",
+  r_th_letter:"Letter",
+  r_th_meaning:"Meaning",
+  r_q1_t:"Final and measured",
+  r_q1_d:"Extracted automatically and repeatably",
+  r_q2_t:"Provisional or just revised",
+  r_q2_d:"Or read from a table and checked",
+  r_q3_t:"Estimated or rounded by the source",
+  r_q3_d:"Or with partial coverage",
+  r_q4_t:"Unverified",
+  r_q4_d:"Read from free text without verification, or produced with an undisclosed method",
+  r_q5_t:"Inconsistent or flagged as wrong",
+  r_q5_d:"Never used on its own",
+  r_s3_eyebrow:"Official statistics",
+  r_s3_title:"From official flags to a letter.",
+  r_s3_lead:"Statistical offices attach standard flags to their values: provisional, estimated, confidential. We translate them automatically, always the same way.",
+  r_s3_codes:"Lower case: Eurostat statistics. Upper case: foreign trade statistics.",
+  r_th_flag:"Flag",
+  r_th_quality:"Quality",
+  r_f1_t:"No flag",
+  r_f1_d:"Normal value",
+  r_f2_t:"Revised",
+  r_f2_d:"Value corrected by the source",
+  r_f3_t:"Break in series",
+  r_f3_d:"Valid value; the break is flagged in the report",
+  r_f4_t:"Provisional",
+  r_f5_t:"Definition differs",
+  r_f5_d:"The value does not follow the standard definition exactly",
+  r_f6_t:"Estimated",
+  r_f6_d:"By the source, or by the European statistical office",
+  r_f7_t:"Imputed",
+  r_f7_d:"Value reconstructed by the source",
+  r_f8_t:"Rounded",
+  r_f9_t:"Forecast",
+  r_f10_t:"Low reliability",
+  r_f10_d:"Flagged by the source itself",
+  r_f11_t:"Unrecognised flag",
+  r_f11_d:"As a precaution",
+  r_f12_t:"Confidential",
+  r_f12_d:"No value is recorded. If needed, we estimate it with a stated method and its own rating",
+  r_s4_eyebrow:"Rules",
+  r_s4_title:"How ratings combine. <em>The weakest link decides.</em>",
+  r_s4_lead:"A result is built from several data points and assumptions. Its rating cannot be better than the weakest link, and it never improves along the chain.",
+  r_r1_t:"The worst letter wins",
+  r_r1_p:"For each of the two letters, a result takes the worst among the data it uses. A calculation with an AA and an AC data point is rated AC.",
+  r_r2_t:"Assumptions are rated too",
+  r_r2_p:"Every assumption is stated and rated. The second letter is the stated confidence in the assumption (E if missing). The first depends on what it rests on:",
+  r_r2_b1:"Based on data:",
+  r_r2_b1d:"the worst source among the linked data",
+  r_r2_b2:"By analogy with another market:",
+  r_r2_b2d:"no better than D",
+  r_r2_b3:"Expert judgement:",
+  r_r2_b3d:"always E",
+  r_r2_b4:"Stated method convention:",
+  r_r2_b4d:"does not lower the rating",
+  r_r2_ai:"An estimate from an AI model is an assumption with its own rating too: the model never produces a final figure.",
+  r_r3_t:"Every estimation step has a cost",
+  r_r3_p:"An estimate for the current year cannot have quality better than C, a forecast no better than D, even when the input data are excellent. In a projection, C holds only for the first year after the series, and only if the error measured on past years stays within 5%. A regional allocation lowers quality by one letter, down to D.",
+  r_r4_t:"No figure without a source",
+  r_r4_p:"Every value stays linked to the original evidence and its source. If a needed data point is confidential or missing, the calculation stays marked as not computable, or the value is estimated with a stated method and its own rating.",
+  r_s5_eyebrow:"Example",
+  r_s5_title:"Consumption of a product in one region.",
+  r_s5_lead:"National consumption comes from production, imports and exports; it is then allocated to the region by employment in user industries. Here is how the letters move.",
+  r_e1:"National production<span>Statistical office · value rounded by the source</span>",
+  r_e2:"Imports<span>Foreign trade statistics · final value</span>",
+  r_e3:"Exports<span>Foreign trade statistics · final value</span>",
+  r_e4:"National consumption = production + imports − exports<span>The worst letter wins in each position</span>",
+  r_e5:"Regional allocation<span>The region's share by employment in user industries</span>",
+  r_e5_tag:"quality −1",
+  r_e6:"Regional consumption<span>Rating of the result shown in the report</span>",
+  r_e_cap:"Illustrative example: no client data.",
+  r_s6_eyebrow:"Limits",
+  r_s6_title:"What the rating does not tell you.",
+  r_l1_t:"Whether the answer fits your question",
+  r_l1_p:"The rating measures the data. How well the result answers your question is discussed separately in the report, with interval, assumptions and method.",
+  r_l2_t:"Whether the source is serious",
+  r_l2_p:"The class describes the checks on the data, not the reputation of the publisher. A D source can hold valuable information.",
+  r_l3_t:"That risk is zero",
+  r_l3_p:"A high rating reduces uncertainty, it does not remove it. That is why every figure stays traceable to its source.",
+  r_ct_title:"Want to see the scale <em>applied to your numbers?</em>"
+},
+fr:{
+  r_eyebrow:"Fiabilité · Échelle de notation",
+  r_title:"Chaque chiffre porte deux lettres. <em>Voici ce qu'elles signifient.</em>",
+  r_lead:"La notation indique jusqu'où se fier à une donnée avant de s'en servir pour décider. Voici ce que mesure chaque lettre, comment elles se combinent et ce qu'elles ne disent pas.",
+  r_toc:"Sur cette page",
+  r_toc1:"Fiabilité de la source",
+  r_toc2:"Qualité de la donnée",
+  r_toc3:"Codes officiels",
+  r_toc4:"Règles",
+  r_toc5:"Exemple",
+  r_toc6:"Limites",
+  r_an_foot:"Les deux lettres sont indépendantes. Un institut statistique peut publier une valeur estimée (<b>AC</b>) ; des comptes déposés donnent une valeur définitive (<b>BA</b>).",
+  r_s1_eyebrow:"Première lettre",
+  r_s1_title:"Fiabilité de la source. <em>Qui publie la donnée, et avec quels contrôles.</em>",
+  r_s1_lead:"Elle dépend de qui produit la donnée et des contrôles qu'elle subit avant publication. Elle est attribuée à la source et vaut pour chaque donnée qui en provient.",
+  r_th_class:"Classe",
+  r_th_source:"Type de source",
+  r_th_examples:"Exemples",
+  r_c1_t:"Statistique officielle",
+  r_c1_d:"Instituts statistiques nationaux et européens, organisations internationales",
+  r_c1_x:"Eurostat, instituts nationaux de statistique, OCDE, Banque mondiale",
+  r_c2_t:"Registres et dépôts réglementés",
+  r_c2_d:"Données que la loi oblige à déposer, avec des contrôles formels",
+  r_c2_x:"Registres du commerce, comptes déposés, codes LEI",
+  r_c3_t:"Agrégateurs commerciaux",
+  r_c3_d:"Bases privées qui collectent et harmonisent des sources primaires",
+  r_c3_x:"Fournisseurs de données d'entreprises et d'informations commerciales",
+  r_c4_t:"Sources publiques non vérifiées",
+  r_c4_d:"Informations publiques sans contrôle indépendant",
+  r_c4_x:"Sites d'entreprises, presse, fédérations professionnelles",
+  r_c5_t:"Déclarations non contrôlées",
+  r_c5_d:"Données que nous ne pouvons pas vérifier de façon indépendante",
+  r_c5_x:"Documents et données fournis par le client, déclarations non vérifiées",
+  r_s1_note:"<b>Classe D ne veut pas dire fausse.</b> Cela veut dire que personne ne l'a contrôlée avant nous. La notation le dit, et un résultat qui utilise cette donnée ne peut pas être noté mieux que D.",
+  r_s2_eyebrow:"Seconde lettre",
+  r_s2_title:"Qualité de la donnée. <em>Comment cette valeur a été produite.</em>",
+  r_s2_lead:"Elle porte sur la valeur elle-même : définitive ou non, estimée ou non, et comment nous l'avons extraite. Deux données d'une même source peuvent avoir des qualités différentes.",
+  r_th_letter:"Lettre",
+  r_th_meaning:"Signification",
+  r_q1_t:"Définitive et mesurée",
+  r_q1_d:"Extraite de façon automatique et reproductible",
+  r_q2_t:"Provisoire ou tout juste révisée",
+  r_q2_d:"Ou lue dans un tableau et contrôlée",
+  r_q3_t:"Estimée ou arrondie par la source",
+  r_q3_d:"Ou avec une couverture partielle",
+  r_q4_t:"Non vérifiée",
+  r_q4_d:"Lue dans un texte libre sans vérification, ou produite avec une méthode non déclarée",
+  r_q5_t:"Incohérente ou signalée comme erronée",
+  r_q5_d:"Jamais utilisée seule",
+  r_s3_eyebrow:"Statistiques officielles",
+  r_s3_title:"Des codes officiels à la lettre.",
+  r_s3_lead:"Les instituts statistiques accompagnent leurs valeurs de codes standard : provisoire, estimé, confidentiel. Nous les traduisons automatiquement, toujours de la même façon.",
+  r_s3_codes:"Minuscules : statistiques Eurostat. Majuscules : statistiques du commerce extérieur.",
+  r_th_flag:"Code",
+  r_th_quality:"Qualité",
+  r_f1_t:"Aucun code",
+  r_f1_d:"Valeur normale",
+  r_f2_t:"Révisé",
+  r_f2_d:"Valeur corrigée par la source",
+  r_f3_t:"Rupture de série",
+  r_f3_d:"Valeur valide ; la rupture est signalée dans le rapport",
+  r_f4_t:"Provisoire",
+  r_f5_t:"Définition différente",
+  r_f5_d:"La valeur ne suit pas exactement la définition standard",
+  r_f6_t:"Estimé",
+  r_f6_d:"Par la source, ou par l'office statistique européen",
+  r_f7_t:"Imputé",
+  r_f7_d:"Valeur reconstituée par la source",
+  r_f8_t:"Arrondi",
+  r_f9_t:"Prévision",
+  r_f10_t:"Faible fiabilité",
+  r_f10_d:"Signalée par la source elle-même",
+  r_f11_t:"Code non reconnu",
+  r_f11_d:"Par prudence",
+  r_f12_t:"Confidentiel",
+  r_f12_d:"Aucune valeur n'est enregistrée. Si nécessaire, nous l'estimons avec une méthode déclarée et sa propre notation",
+  r_s4_eyebrow:"Règles",
+  r_s4_title:"Comment les notations se combinent. <em>Le maillon le plus faible décide.</em>",
+  r_s4_lead:"Un résultat repose sur plusieurs données et hypothèses. Sa notation ne peut pas être meilleure que le maillon le plus faible, et elle ne s'améliore jamais le long de la chaîne.",
+  r_r1_t:"La pire lettre l'emporte",
+  r_r1_p:"Pour chacune des deux lettres, un résultat prend la moins bonne des données qu'il utilise. Un calcul avec une donnée AA et une donnée AC est noté AC.",
+  r_r2_t:"Les hypothèses sont notées aussi",
+  r_r2_p:"Chaque hypothèse est déclarée et notée. La seconde lettre est la confiance déclarée dans l'hypothèse (E si absente). La première dépend de ce sur quoi elle repose :",
+  r_r2_b1:"Fondée sur des données :",
+  r_r2_b1d:"la moins bonne source parmi les données liées",
+  r_r2_b2:"Par analogie avec un autre marché :",
+  r_r2_b2d:"pas mieux que D",
+  r_r2_b3:"Avis d'expert :",
+  r_r2_b3d:"toujours E",
+  r_r2_b4:"Convention de méthode déclarée :",
+  r_r2_b4d:"ne dégrade pas la notation",
+  r_r2_ai:"L'estimation d'un modèle d'intelligence artificielle est elle aussi une hypothèse avec sa propre notation : le modèle ne produit jamais un chiffre final.",
+  r_r3_t:"Chaque étape d'estimation a un coût",
+  r_r3_p:"Une estimation de l'année en cours ne peut pas avoir une qualité meilleure que C, une prévision pas meilleure que D, même lorsque les données de départ sont excellentes. Dans une projection, C ne vaut que pour la première année après la série, et seulement si l'erreur mesurée sur les années passées reste dans les 5 %. Une répartition régionale abaisse la qualité d'une lettre, jusqu'à D.",
+  r_r4_t:"Aucun chiffre sans source",
+  r_r4_p:"Chaque valeur reste reliée à la preuve d'origine et à sa source. Si une donnée nécessaire est confidentielle ou manquante, le calcul reste marqué comme non calculable, ou la valeur est estimée avec une méthode déclarée et sa propre notation.",
+  r_s5_eyebrow:"Exemple",
+  r_s5_title:"La consommation d'un produit dans une région.",
+  r_s5_lead:"La consommation nationale se calcule à partir de la production, des importations et des exportations ; elle est ensuite répartie sur la région selon l'emploi des secteurs utilisateurs. Voici comment évoluent les lettres.",
+  r_e1:"Production nationale<span>Institut statistique · valeur arrondie par la source</span>",
+  r_e2:"Importations<span>Statistiques du commerce extérieur · valeur définitive</span>",
+  r_e3:"Exportations<span>Statistiques du commerce extérieur · valeur définitive</span>",
+  r_e4:"Consommation nationale = production + import − export<span>La pire lettre l'emporte à chaque position</span>",
+  r_e5:"Répartition régionale<span>Part de la région selon l'emploi des secteurs utilisateurs</span>",
+  r_e5_tag:"qualité −1",
+  r_e6:"Consommation de la région<span>Notation du résultat indiquée dans le rapport</span>",
+  r_e_cap:"Exemple illustratif : aucune donnée client.",
+  r_s6_eyebrow:"Limites",
+  r_s6_title:"Ce que la notation ne dit pas.",
+  r_l1_t:"Si la réponse convient à votre question",
+  r_l1_p:"La notation mesure la donnée. La façon dont le résultat répond à votre question est discutée à part dans le rapport, avec l'intervalle, les hypothèses et la méthode.",
+  r_l2_t:"Si la source est sérieuse",
+  r_l2_p:"La classe décrit les contrôles sur la donnée, pas la réputation de l'éditeur. Une source D peut contenir des informations précieuses.",
+  r_l3_t:"Que le risque soit nul",
+  r_l3_p:"Une bonne notation réduit l'incertitude, elle ne la supprime pas. C'est pourquoi chaque chiffre reste traçable jusqu'à sa source.",
+  r_ct_title:"Vous voulez voir l'échelle <em>appliquée à vos chiffres ?</em>"
+}
+};
+</script>
+
+<script>
+/* ================= INTERACTIONS (theme, mobile menu, header, reveal: as on the home) ================= */
+(function(){
+  var d = document, root = d.documentElement;
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var hasIO = 'IntersectionObserver' in window;
+
+  var KEY = 'perceptra-theme';
+  var darkMQ = window.matchMedia('(prefers-color-scheme: dark)');
+  function effectiveTheme(){ return root.getAttribute('data-theme') || (darkMQ.matches ? 'dark' : 'light'); }
+  function syncTheme(){
+    var dark = effectiveTheme() === 'dark';
+    d.querySelectorAll('[data-theme-toggle]').forEach(function(b){ b.setAttribute('aria-pressed', dark ? 'true' : 'false'); });
+  }
+  d.querySelectorAll('[data-theme-toggle]').forEach(function(b){
+    b.addEventListener('click', function(){
+      var next = effectiveTheme() === 'dark' ? 'light' : 'dark';
+      root.setAttribute('data-theme', next);
+      try { localStorage.setItem(KEY, next); } catch(e) {}
+      syncTheme();
+    });
+  });
+  if (darkMQ.addEventListener) darkMQ.addEventListener('change', syncTheme);
+  syncTheme();
+
+  var menuBtn = d.querySelector('.menu-btn'), panel = d.getElementById('menu');
+  function setMenu(open){
+    menuBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+    panel.hidden = !open;
+    root.classList.toggle('menu-open', open);
+  }
+  menuBtn.addEventListener('click', function(){ setMenu(menuBtn.getAttribute('aria-expanded') !== 'true'); });
+  panel.addEventListener('click', function(e){ if (e.target.closest('a')) setMenu(false); });
+  d.addEventListener('keydown', function(e){
+    if (e.key === 'Escape' && menuBtn.getAttribute('aria-expanded') === 'true') { setMenu(false); menuBtn.focus(); }
+  });
+  var wide = window.matchMedia('(min-width: 1101px)');
+  if (wide.addEventListener) wide.addEventListener('change', function(e){ if (e.matches) setMenu(false); });
+
+  var header = d.querySelector('.site-header');
+  function onScroll(){ header.classList.toggle('scrolled', window.scrollY > 8); }
+  window.addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
+
+  var rv = d.querySelectorAll('.rv');
+  if (!hasIO || reduce) { rv.forEach(function(el){ el.classList.add('in'); }); }
+  else {
+    var io = new IntersectionObserver(function(entries){
+      entries.forEach(function(e){ if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
+    }, { threshold: 0.08 });
+    rv.forEach(function(el){ io.observe(el); });
+  }
+})();
+</script>
+</body>
+</html>
