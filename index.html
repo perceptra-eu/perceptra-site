@@ -281,6 +281,10 @@ p{text-wrap:pretty}
 .scale i.on{background:var(--glow);border-color:var(--glow);color:var(--navy);font-weight:500}
 .grade p{color:var(--text-2);font-size:.95rem}
 .threshold{margin-top:1.1rem;padding:.8rem 1rem;border-left:2px solid var(--glow);background:var(--tint);border-radius:0 var(--r-sm) var(--r-sm) 0;font-family:var(--f-mono);font-size:.8rem;line-height:1.5;color:var(--text)}
+.rel-more{display:inline-flex;align-items:center;gap:.45rem;margin-top:.9rem;font-weight:600;color:var(--accent);border-radius:6px}
+.rel-more span:first-child{text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:4px}
+.rel-more .arr{transition:transform .2s}
+.rel-more:hover .arr{transform:translateX(3px)}
 
 /* ---------- services ---------- */
 .engines-grid{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,.8fr);gap:1rem}
@@ -591,6 +595,7 @@ p{text-wrap:pretty}
           </div>
         </div>
         <p data-i18n="a_desc"></p>
+        <a class="rel-more" href="/rating"><span data-i18n="a_more"></span><span class="arr" aria-hidden="true">→</span></a>
         <p class="threshold" data-i18n="a_shcs"></p>
       </div>
     </div>
@@ -769,6 +774,7 @@ p{text-wrap:pretty}
         <p class="f-h" data-i18n="f_nav_h"></p>
         <a href="#metodo" data-i18n="n_metodo"></a>
         <a href="#affidabilita" data-i18n="n_aff"></a>
+        <a href="/rating" data-i18n="n_scale"></a>
         <a href="#servizi" data-i18n="n_servizi"></a>
         <a href="#chi-siamo" data-i18n="n_chi"></a>
         <a href="#faq" data-i18n="n_faq"></a>
@@ -889,6 +895,8 @@ it:{
   a_src:"Affidabilità della fonte",
   a_qual:"Qualità del dato",
   a_desc:"Prima lettera: affidabilità della fonte. Seconda lettera: qualità del dato. Da A a E, dichiarato su ogni numero.",
+  a_more:"Leggi la scala completa",
+  n_scale:"Scala di rating",
   a_shcs:"Audience sintetiche: SHCS ≥ 0,80. Sotto soglia, lo studio non esce.",
   sv_eyebrow:"Cosa facciamo",
   sv_title:"Due motori, <em>un solo standard di rigore.</em>",
@@ -1058,6 +1066,8 @@ en:{
   a_src:"Source reliability",
   a_qual:"Data quality",
   a_desc:"First letter: source reliability. Second letter: data quality. From A to E, stated on every figure.",
+  a_more:"Read the full scale",
+  n_scale:"Rating scale",
   a_shcs:"Synthetic audiences: SHCS ≥ 0.80. Below the threshold, the study doesn't ship.",
   sv_eyebrow:"What we do",
   sv_title:"Two engines, <em>one standard of rigour.</em>",
@@ -1227,6 +1237,8 @@ fr:{
   a_src:"Fiabilité de la source",
   a_qual:"Qualité de la donnée",
   a_desc:"Première lettre : fiabilité de la source. Seconde lettre : qualité de la donnée. De A à E, indiquée sur chaque chiffre.",
+  a_more:"Lire l'échelle complète",
+  n_scale:"Échelle de notation",
   a_shcs:"Audiences synthétiques : SHCS ≥ 0,80. En dessous du seuil, l'étude n'est pas livrée.",
   sv_eyebrow:"Nos services",
   sv_title:"Deux moteurs, <em>une seule exigence de rigueur.</em>",
