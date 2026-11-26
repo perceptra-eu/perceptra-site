@@ -1,13 +1,17 @@
-import { readFileSync, writeFileSync } from 'node:fs';
+import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
 
 const ORIGIN = 'https://perceptra.eu';
 const src = readFileSync('index.html', 'utf8');
+const ratingSrc = readFileSync('rating.html', 'utf8');
 
 /* pull the translation dictionary out of the inline script */
-const dictStart = src.indexOf('const I18N = ') + 'const I18N = '.length;
-const dictEnd = src.indexOf('\nfunction setLang');
-const dictSrc = src.slice(dictStart, dictEnd).trim().replace(/;$/, '');
-const I18N = new Function('return ' + dictSrc)();
+function readDict(html) {
+  const start = html.indexOf('const I18N = ') + 'const I18N = '.length;
+  const end = html.indexOf('\n};', start) + 2;
+  return new Function('return ' + html.slice(start, end))();
+}
+const I18N = readDict(src);
+const RATING_I18N = readDict(ratingSrc);
 
 const META = {
   it: {
@@ -32,6 +36,17 @@ const META = {
     desc: 'Perceptra reconstitue les chiffres de votre march\u00e9 : taille par produit et par zone, parts de march\u00e9, acteurs et pr\u00e9visions. M\u00e9thodologie propri\u00e9taire, chaque chiffre avec sa source et sa notation de fiabilit\u00e9.'
   }
 };
+
+/* data rating scale page (proof of method) */
+const RATING = {
+  it: { lang: 'it-IT', path: '/rating', file: 'rating.html', home: '/' },
+  en: { lang: 'en', path: '/en/rating', file: 'en/rating.html', home: '/en' },
+  fr: { lang: 'fr', path: '/fr/rating', file: 'fr/rating.html', home: '/fr' }
+};
+for (const [c, r] of Object.entries(RATING)) {
+  r.title = RATING_I18N[c]._title;
+  r.desc = RATING_I18N[c]._desc;
+}
 
 const organization = {
   '@context': 'https://schema.org',
@@ -161,15 +176,15 @@ const ld = [organization, website, service, serviceAudiences, faq]
   .map(o => `<script type="application/ld+json">${JSON.stringify(o)}</script>`)
   .join('\n');
 
-function head(code) {
-  const m = META[code];
-  const alt = Object.entries(META)
+function head(code, pages = META, jsonld = ld) {
+  const m = pages[code];
+  const alt = Object.entries(pages)
     .map(([c, v]) => `<link rel="alternate" hreflang="${c}" href="${ORIGIN}${v.path}">`)
     .join('\n');
   return `
 <link rel="canonical" href="${ORIGIN}${m.path}">
 ${alt}
-<link rel="alternate" hreflang="x-default" href="${ORIGIN}/">
+<link rel="alternate" hreflang="x-default" href="${ORIGIN}${pages.it.path}">
 <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1">
 <meta name="author" content="Perceptra">
 <meta name="geo.region" content="IT">
@@ -191,13 +206,14 @@ ${alt}
 <link rel="apple-touch-icon" href="/brand/apple-touch-icon.png">
 <meta name="theme-color" content="#0B1D2D">
 <meta property="og:image:alt" content="Perceptra — Market Intelligence">
-${ld}
+${jsonld}
 `;
 }
 
-function build(code) {
-  const m = META[code];
-  let h = src;
+/* Shared per-language rendering: meta, head, pre-rendered translations, sibling-URL switcher */
+function render(html, code, pages, dict, jsonld) {
+  const m = pages[code];
+  let h = html;
 
   h = h.replace('<html lang="it">', `<html lang="${code}">`);
   h = h.replace(/<title>[\s\S]*?<\/title>/, `<title>${m.title}</title>`);
@@ -208,13 +224,12 @@ function build(code) {
 
   const order = ['it', 'en', 'fr'];
   let ti = 0, di = 0;
-  h = h.replace(/(?<![A-Za-z0-9_])_title:"[^"]*",/g, () => `_title:${JSON.stringify(META[order[ti++]].title)},`);
-  h = h.replace(/(?<![A-Za-z0-9_])_desc:"[^"]*",/g, () => `_desc:${JSON.stringify(META[order[di++]].desc)},`);
+  h = h.replace(/(?<![A-Za-z0-9_])_title:"[^"]*",/g, () => `_title:${JSON.stringify(pages[order[ti++]].title)},`);
+  h = h.replace(/(?<![A-Za-z0-9_])_desc:"[^"]*",/g, () => `_desc:${JSON.stringify(pages[order[di++]].desc)},`);
 
-  h = h.replace('</head>', head(code) + '</head>');
+  h = h.replace('</head>', head(code, pages, jsonld) + '</head>');
 
   /* Pre-render translations so each language ships real text, not empty tags */
-  const dict = I18N[code] || I18N.it;
   h = h.replace(
     /<([a-z0-9]+)([^>]*\sdata-i18n="([^"]+)"[^>]*)>\s*<\/\1>/g,
     (whole, tag, attrs, key) =>
@@ -222,11 +237,12 @@ function build(code) {
   );
 
   /* Language switcher navigates to the sibling URL instead of swapping text */
+  const paths = Object.fromEntries(Object.entries(pages).map(([c, v]) => [c, v.path]));
   h = h.replace(
     /\/\* Auto-detect[\s\S]*?\}\)\(\);/,
     `(function(){
   const CUR = ${JSON.stringify(code)};
-  const PATHS = {it:"/", en:"/en", fr:"/fr"};
+  const PATHS = ${JSON.stringify(paths)};
   document.querySelectorAll('.lang button').forEach(b=>{
     const l = b.dataset.lang;
     b.classList.toggle('active', l===CUR);
@@ -239,18 +255,63 @@ function build(code) {
   return h;
 }
 
+function build(code) {
+  let h = render(src, code, META, I18N[code] || I18N.it, ld);
+  /* links to the rating scale point to the page in the same language */
+  h = h.replaceAll('href="/rating"', `href="${RATING[code].path}"`);
+  return h;
+}
+
+function buildRating(code) {
+  const r = RATING[code];
+  const page = {
+    '@context': 'https://schema.org',
+    '@type': 'WebPage',
+    '@id': ORIGIN + r.path,
+    url: ORIGIN + r.path,
+    name: r.title,
+    description: r.desc,
+    inLanguage: r.lang,
+    isPartOf: { '@id': ORIGIN + '/#website' },
+    publisher: { '@id': ORIGIN + '/#organization' }
+  };
+  const jsonld = [organization, website, page]
+    .map(o => `<script type="application/ld+json">${JSON.stringify(o)}</script>`)
+    .join('\n');
+  let h = render(ratingSrc, code, RATING, RATING_I18N[code], jsonld);
+  /* links back to the home page in the same language */
+  h = h.replace(/data-home="([^"]*)" href="[^"]*"/g, (_, hash) => `data-home="${hash}" href="${r.home}${hash}"`);
+  /* app links carry the language and campaign without waiting for JS */
+  const appLang = code === 'fr' ? 'fr' : 'en';
+  h = h.replace(
+    /href="https:\/\/app\.perceptra\.eu\/([a-z]+)" ([^>]*data-utm="([^"]*)")/g,
+    (_, path, rest, utm) =>
+      `href="https://app.perceptra.eu/${path}?lang=${appLang}&amp;utm_source=perceptra.eu&amp;utm_medium=site&amp;utm_campaign=${utm}" ${rest}`
+  );
+  return h;
+}
+
 for (const code of Object.keys(META)) {
   writeFileSync('public/' + META[code].file, build(code));
 }
+mkdirSync('public/en', { recursive: true });
+mkdirSync('public/fr', { recursive: true });
+for (const code of Object.keys(RATING)) {
+  writeFileSync('public/' + RATING[code].file, buildRating(code));
+}
 
 const today = new Date().toISOString().slice(0, 10);
-const urls = Object.values(META).map(m => `  <url>
+const sitemapEntries = (pages, priority, freq) => Object.values(pages).map(m => `  <url>
     <loc>${ORIGIN}${m.path}</loc>
     <lastmod>${today}</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>${m.path === '/' ? '1.0' : '0.8'}</priority>
-${Object.entries(META).map(([c, v]) => `    <xhtml:link rel="alternate" hreflang="${c}" href="${ORIGIN}${v.path}"/>`).join('\n')}
+    <changefreq>${freq}</changefreq>
+    <priority>${priority(m)}</priority>
+${Object.entries(pages).map(([c, v]) => `    <xhtml:link rel="alternate" hreflang="${c}" href="${ORIGIN}${v.path}"/>`).join('\n')}
   </url>`).join('\n');
+const urls = [
+  sitemapEntries(META, m => (m.path === '/' ? '1.0' : '0.8'), 'weekly'),
+  sitemapEntries(RATING, () => '0.6', 'monthly')
+].join('\n');
 
 writeFileSync('public/sitemap.xml', `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">
@@ -285,7 +346,8 @@ writeFileSync('public/llms.txt', `# Perceptra
 
 ## Affidabilità
 Ogni numero si può ricondurre a calcolo, evidenza e fonte. Ogni dato ha un rating di due lettere
-(A–E): affidabilità della fonte e qualità del dato.
+(A–E): affidabilità della fonte e qualità del dato. Scala completa e regole di combinazione:
+${ORIGIN}/rating (inglese: ${ORIGIN}/en/rating, francese: ${ORIGIN}/fr/rating).
 
 ## Audience sintetiche (beni di consumo)
 Focus group simulati con audience sintetiche calibrate su un panel umano di controllo.
@@ -310,7 +372,7 @@ copyFileSync('brand/perceptra-symbol.svg', 'public/favicon.svg');
 /* carry over any other asset sitting next to index.html (og.png, etc.) */
 import { readdirSync, copyFileSync, cpSync, statSync } from 'node:fs';
 for (const f of readdirSync('.')) {
-  if (['index.html', 'seo.mjs', 'package.json', 'vercel.json', 'public', 'node_modules', '.git', 'CNAME'].includes(f)) continue;
+  if (['index.html', 'rating.html', 'seo.mjs', 'package.json', 'vercel.json', 'public', 'node_modules', '.git', 'CNAME'].includes(f)) continue;
   if (statSync(f).isFile()) copyFileSync(f, 'public/' + f);
 }
 

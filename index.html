@@ -218,6 +218,8 @@ nav{
 .score .v{font-family:'Archivo',sans-serif;font-weight:800;font-size:clamp(3.4rem,6vw,5rem);letter-spacing:-.01em;line-height:1;background:linear-gradient(100deg,var(--cyan),var(--teal));-webkit-background-clip:text;background-clip:text;color:transparent}
 .score .l{font-family:'IBM Plex Mono',monospace;font-size:.68rem;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);margin-top:.6rem}
 .score p{color:var(--muted);font-size:.95rem;margin-top:1.2rem;max-width:34ch}
+.rel-more{display:inline-flex;align-items:center;gap:.5rem;margin-top:1.4rem;font-family:'IBM Plex Mono',monospace;font-size:.74rem;letter-spacing:.12em;text-transform:uppercase;color:var(--cyan);transition:gap .2s}
+.rel-more:hover{gap:.8rem}
 .threshold{
   margin-top:1.4rem;padding:.8rem 1rem;border-left:2px solid var(--cyan);
   background:rgba(50,199,221,.06);font-size:.78rem;color:var(--paper);border-radius:0 8px 8px 0;
@@ -473,6 +475,7 @@ footer{border-top:1px solid var(--line);padding:64px 0 40px}
         <div class="threshold" data-i18n="a_shcs"></div>
       </div>
     </div>
+    <a class="rel-more rv" href="/rating" data-i18n="a_more"></a>
   </div>
 </section>
 
@@ -595,6 +598,7 @@ footer{border-top:1px solid var(--line);padding:64px 0 40px}
         <a href="#servizi" data-i18n="n_servizi"></a>
         <a href="#metodo" data-i18n="n_metodo"></a>
         <a href="#affidabilita" data-i18n="n_aff"></a>
+        <a href="/rating" data-i18n="n_scale"></a>
         <a href="#chi-siamo" data-i18n="n_chi"></a>
       </div>
       <div class="f-col">
@@ -735,6 +739,8 @@ it:{
   ch5_t:"Istituto statistico ufficiale<span>affidabilità della fonte: classe A</span>",
   a_label:"Rating del dato · esempio",
   a_desc:"Prima lettera: affidabilità della fonte. Seconda lettera: qualità del dato. Da A a E, dichiarato su ogni numero.",
+  a_more:"Leggi la scala completa →",
+  n_scale:"Scala di rating",
   a_shcs:"AUDIENCE SINTETICHE: SHCS ≥ 0.80 — sotto soglia, lo studio non esce.",
   f_line:"Market Intelligence · Audience sintetiche"
 },
@@ -859,6 +865,8 @@ en:{
   ch5_t:"Official statistics office<span>source reliability: class A</span>",
   a_label:"Data rating · example",
   a_desc:"First letter: source reliability. Second letter: data quality. From A to E, stated on every figure.",
+  a_more:"Read the full scale →",
+  n_scale:"Rating scale",
   a_shcs:"SYNTHETIC AUDIENCES: SHCS ≥ 0.80 — below the threshold, the study doesn't ship.",
   f_line:"Market Intelligence · Synthetic audiences"
 },
@@ -983,6 +991,8 @@ fr:{
   ch5_t:"Institut statistique officiel<span>fiabilité de la source : classe A</span>",
   a_label:"Notation de la donnée · exemple",
   a_desc:"Première lettre : fiabilité de la source. Seconde lettre : qualité de la donnée. De A à E, indiquée sur chaque chiffre.",
+  a_more:"Lire l'échelle complète →",
+  n_scale:"Échelle de notation",
   a_shcs:"AUDIENCES SYNTHÉTIQUES : SHCS ≥ 0,80 — en dessous du seuil, l'étude n'est pas livrée.",
   f_line:"Market Intelligence · Audiences synthétiques"
 }
